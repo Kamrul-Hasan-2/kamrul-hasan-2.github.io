@@ -354,12 +354,11 @@ ul { list-style: none; }
   overflow: hidden;
   background: var(--white);
   padding: 0;
-  margin-top: var(--header-h);
 }
 
 .hero .row {
-  min-height: auto;
-  padding: 60px 0;
+  min-height: 100vh;
+  padding: 0;
 }
 
 .hero-subtitle {
