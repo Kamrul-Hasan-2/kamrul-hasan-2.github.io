@@ -376,21 +376,24 @@ ul { list-style: none; }
   font-weight: 700;
   color: var(--grey-900);
   line-height: 1.1;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .hero-typed-wrap {
   display: flex;
   align-items: center;
+  gap: 2px;
   font-size: 19px;
   color: var(--grey-500);
-  margin-bottom: 24px;
+  margin-bottom: 32px;
   min-height: 32px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 
-.typed-prefix { font-weight: 400; }
-.typed { font-weight: 600; color: var(--grey-800); }
-.typed-cursor { color: var(--grey-400); font-weight: 300; }
+.typed-prefix { font-weight: 400; white-space: nowrap; }
+.typed { font-weight: 600; color: var(--grey-800); display: inline-block; min-width: 200px; }
+.typed-cursor { color: var(--grey-400); font-weight: 300; margin-left: 2px; }
 
 .hero-description {
   font-size: 16px;
