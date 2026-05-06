@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MySQL শেখো বাংলায়</title>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2128;
+    --border: #30363d;
+    --accent: #00d4aa;
+    --accent2: #f78166;
+    --accent3: #e3b341;
+    --text: #e6edf3;
+    --text2: #8b949e;
+    --blue: #58a6ff;
+    --purple: #bc8cff;
+    --green: #3fb950;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Hind Siliguri', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, #0d1117 0%, #1a1f2e 50%, #0d1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 60px;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 1.2rem; font-weight: 700;
+  }
+  .logo-icon {
+    background: linear-gradient(135deg, var(--accent), var(--blue));
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+  }
+  .logo span { color: var(--accent); }
+  .progress-bar-wrap {
+    flex: 1; max-width: 300px; margin: 0 24px;
+  }
+  .progress-label { font-size: 0.75rem; color: var(--text2); margin-bottom: 4px; }
+  .progress-bar {
+    height: 6px; background: var(--border); border-radius: 3px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--blue));
+    border-radius: 3px;
+    transition: width 0.5s ease;
+    width: 0%;
+  }
+
+  /* LAYOUT */
+  .layout { display: flex; height: calc(100vh - 60px); }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 260px; min-width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 16px 0;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .section-header {
+    padding: 8px 16px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 8px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 16px;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: all 0.2s;
+    font-size: 0.88rem;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--accent); }
+  .nav-item.active {
+    background: rgba(0,212,170,0.08);
+    border-left-color: var(--accent);
+    color: var(--accent);
+  }
+  .nav-item.done .nav-dot { background: var(--green); }
+  .nav-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--border); flex-shrink: 0;
+    transition: background 0.3s;
+  }
+  .nav-item.active .nav-dot { background: var(--accent); }
+
+  /* CONTENT */
+  .content {
+    flex: 1; overflow-y: auto; padding: 32px;
+  }
+  .content::-webkit-scrollbar { width: 6px; }
+  .content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .lesson { display: none; }
+  .lesson.active { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+  .lesson-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 12px; border-radius: 20px;
+    font-size: 0.75rem; font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .badge-beginner { background: rgba(63,185,80,0.15); color: var(--green); }
+  .badge-intermediate { background: rgba(88,166,255,0.15); color: var(--blue); }
+  .badge-advanced { background: rgba(247,129,102,0.15); color: var(--accent2); }
+
+  h1.lesson-title {
+    font-size: 2rem; font-weight: 700; margin-bottom: 8px;
+    background: linear-gradient(135deg, var(--text), var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    line-height: 1.3;
+  }
+  .lesson-desc {
+    color: var(--text2); margin-bottom: 28px; font-size: 1rem; line-height: 1.7;
+  }
+
+  h2 { font-size: 1.2rem; font-weight: 600; margin: 24px 0 12px; color: var(--accent3); }
+  h3 { font-size: 1rem; font-weight: 600; margin: 18px 0 8px; color: var(--blue); }
+  p { line-height: 1.8; color: var(--text2); margin-bottom: 12px; font-size: 0.95rem; }
+
+  .info-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 0.92rem;
+    line-height: 1.7;
+  }
+  .info-box.warning { border-left-color: var(--accent3); }
+  .info-box.tip { border-left-color: var(--purple); }
+  .info-box strong { color: var(--text); }
+
+  /* CODE BLOCK */
+  .code-block {
+    background: #010409;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin: 16px 0;
+    overflow: hidden;
+  }
+  .code-header {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 0.78rem; color: var(--text2);
+  }
+  .code-header .lang { color: var(--accent); font-weight: 600; }
+  .copy-btn {
+    background: none; border: 1px solid var(--border);
+    color: var(--text2); padding: 3px 10px; border-radius: 4px;
+    cursor: pointer; font-size: 0.75rem; font-family: inherit;
+    transition: all 0.2s;
+  }
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+  pre {
+    padding: 20px; overflow-x: auto; font-size: 0.85rem;
+    font-family: 'JetBrains Mono', monospace; line-height: 1.7;
+  }
+  pre::-webkit-scrollbar { height: 4px; }
+  pre::-webkit-scrollbar-thumb { background: var(--border); }
+
+  /* SQL Syntax Highlighting */
+  .kw { color: #ff7b72; font-weight: 600; }
+  .fn { color: #d2a8ff; }
+  .str { color: #a5d6ff; }
+  .num { color: #f0883e; }
+  .cm { color: #8b949e; font-style: italic; }
+  .tbl { color: #ffa657; }
+  .col { color: #79c0ff; }
+
+  /* QUIZ */
+  .quiz-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 24px 0;
+  }
+  .quiz-box h3 { color: var(--accent3); margin-top: 0; font-size: 1rem; }
+  .quiz-question { font-size: 0.95rem; margin-bottom: 16px; color: var(--text); }
+  .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+  .quiz-opt {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 16px;
+    cursor: pointer;
+    font-family: inherit; font-size: 0.9rem;
+    color: var(--text); text-align: left;
+    transition: all 0.2s;
+  }
+  .quiz-opt:hover { border-color: var(--accent); background: rgba(0,212,170,0.05); }
+  .quiz-opt.correct { border-color: var(--green); background: rgba(63,185,80,0.1); color: var(--green); }
+  .quiz-opt.wrong { border-color: var(--accent2); background: rgba(247,129,102,0.1); color: var(--accent2); }
+  .quiz-result { margin-top: 12px; font-size: 0.9rem; font-weight: 600; display: none; }
+
+  /* TABLE */
+  .sql-table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.88rem;
+  }
+  .sql-table th {
+    background: var(--surface2); padding: 10px 14px;
+    border: 1px solid var(--border); color: var(--accent3); text-align: left;
+    font-weight: 600;
+  }
+  .sql-table td {
+    padding: 9px 14px; border: 1px solid var(--border); color: var(--text2);
+  }
+  .sql-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* NAV BUTTONS */
+  .lesson-nav {
+    display: flex; gap: 12px; margin-top: 32px; padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .btn {
+    padding: 10px 24px; border-radius: 8px; border: none;
+    cursor: pointer; font-family: inherit; font-size: 0.9rem; font-weight: 600;
+    transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #00b894);
+    color: #000;
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(0,212,170,0.3); }
+  .btn-secondary {
+    background: var(--surface2); color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* TAGS */
+  .tag {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 0.75rem; font-weight: 600; margin: 2px;
+    background: rgba(88,166,255,0.15); color: var(--blue);
+  }
+
+  /* WELCOME */
+  .welcome-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px; margin: 24px 0;
+  }
+  .welcome-card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px; text-align: center;
+  }
+  .welcome-card .icon { font-size: 2rem; margin-bottom: 8px; }
+  .welcome-card h3 { color: var(--text); font-size: 0.95rem; margin: 0 0 4px; }
+  .welcome-card p { font-size: 0.82rem; margin: 0; }
+
+  /* HAMBURGER BUTTON */
+  .hamburger {
+    display: none;
+    flex-direction: column; justify-content: center; align-items: center;
+    gap: 5px; width: 36px; height: 36px;
+    background: none; border: 1px solid var(--border);
+    border-radius: 8px; cursor: pointer; flex-shrink: 0;
+  }
+  .hamburger span {
+    display: block; width: 18px; height: 2px;
+    background: var(--text); border-radius: 2px;
+    transition: all 0.3s;
+  }
+  .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; }
+  .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  /* OVERLAY */
+  .sidebar-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 90;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(2px);
+  }
+  .sidebar-overlay.visible { display: block; }
+
+  /* MOBILE BOTTOM NAV */
+  .mobile-lesson-nav {
+    display: none;
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 10px 16px;
+    gap: 10px;
+    z-index: 80;
+  }
+
+  /* ── RESPONSIVE BREAKPOINTS ── */
+
+  @media (max-width: 768px) {
+    /* Header */
+    header { padding: 0 14px; gap: 10px; height: 56px; }
+    .logo { font-size: 1rem; }
+    .logo-icon { width: 28px; height: 28px; font-size: 0.9rem; }
+    .progress-bar-wrap { margin: 0 10px; }
+    .progress-label { font-size: 0.7rem; }
+    .hamburger { display: flex; }
+
+    /* Layout: sidebar slides in as drawer */
+    .layout { flex-direction: column; height: calc(100vh - 56px); }
+
+    .sidebar {
+      position: fixed;
+      top: 56px; left: 0;
+      width: 280px; max-width: 85vw;
+      height: calc(100vh - 56px);
+      z-index: 95;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      border-right: 1px solid var(--border);
+    }
+    .sidebar.open { transform: translateX(0); }
+
+    /* Content full width, padding for bottom nav */
+    .content {
+      padding: 20px 16px 80px;
+      height: calc(100vh - 56px);
+      overflow-y: auto;
+    }
+
+    /* Lesson title smaller */
+    h1.lesson-title { font-size: 1.5rem; }
+    h2 { font-size: 1.05rem; }
+
+    /* Code smaller on mobile */
+    pre { font-size: 0.78rem; padding: 14px; }
+
+    /* Table scroll */
+    .sql-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .sql-table { min-width: 420px; }
+    .sql-table th, .sql-table td { padding: 8px 10px; font-size: 0.82rem; }
+
+    /* Welcome grid 2-col */
+    .welcome-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .welcome-card { padding: 14px 10px; }
+    .welcome-card .icon { font-size: 1.5rem; }
+
+    /* Quiz bigger tap targets */
+    .quiz-opt { padding: 12px 14px; font-size: 0.88rem; }
+    .quiz-box { padding: 18px 14px; }
+
+    /* Info box */
+    .info-box { padding: 14px 14px; font-size: 0.88rem; }
+
+    /* Hide desktop lesson-nav, show mobile one */
+    .lesson-nav { display: none !important; }
+    .mobile-lesson-nav { display: flex; }
+
+    /* Buttons full width on mobile */
+    .mobile-lesson-nav .btn { flex: 1; justify-content: center; font-size: 0.88rem; padding: 10px 12px; }
+  }
+
+  @media (max-width: 400px) {
+    .content { padding: 14px 12px 80px; }
+    h1.lesson-title { font-size: 1.3rem; }
+    .welcome-grid { grid-template-columns: 1fr 1fr; }
+    pre { font-size: 0.72rem; padding: 12px; }
+    .progress-bar-wrap { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <button class="hamburger" id="hamburger" onclick="toggleSidebar()" aria-label="মেনু">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="logo">
+    <div class="logo-icon">🗄</div>
+    <div>MySQL <span>বাংলায়</span></div>
+  </div>
+  <div class="progress-bar-wrap">
+    <div class="progress-label">অগ্রগতি: <span id="progressText">0/14</span> পাঠ সম্পন্ন</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="section-header">🟢 শুরু করো</div>
+    <div class="nav-item active" onclick="showLesson(0)" id="nav-0"><div class="nav-dot"></div>ভূমিকা ও ইনস্টলেশন</div>
+    <div class="nav-item" onclick="showLesson(1)" id="nav-1"><div class="nav-dot"></div>ডেটাবেস তৈরি করা</div>
+    <div class="nav-item" onclick="showLesson(2)" id="nav-2"><div class="nav-dot"></div>টেবিল তৈরি করা</div>
+    <div class="nav-item" onclick="showLesson(3)" id="nav-3"><div class="nav-dot"></div>ডেটা ইনসার্ট করা</div>
+
+    <div class="section-header">🔵 মধ্যবর্তী</div>
+    <div class="nav-item" onclick="showLesson(4)" id="nav-4"><div class="nav-dot"></div>SELECT ও WHERE</div>
+    <div class="nav-item" onclick="showLesson(5)" id="nav-5"><div class="nav-dot"></div>UPDATE ও DELETE</div>
+    <div class="nav-item" onclick="showLesson(6)" id="nav-6"><div class="nav-dot"></div>ORDER BY ও LIMIT</div>
+    <div class="nav-item" onclick="showLesson(7)" id="nav-7"><div class="nav-dot"></div>ফাংশন ও Aggregate</div>
+    <div class="nav-item" onclick="showLesson(8)" id="nav-8"><div class="nav-dot"></div>GROUP BY ও HAVING</div>
+
+    <div class="section-header">🔴 উন্নত</div>
+    <div class="nav-item" onclick="showLesson(9)" id="nav-9"><div class="nav-dot"></div>JOIN (সংযুক্তি)</div>
+    <div class="nav-item" onclick="showLesson(10)" id="nav-10"><div class="nav-dot"></div>Subquery</div>
+    <div class="nav-item" onclick="showLesson(11)" id="nav-11"><div class="nav-dot"></div>Index ও Performance</div>
+    <div class="nav-item" onclick="showLesson(12)" id="nav-12"><div class="nav-dot"></div>View ও Stored Procedure</div>
+    <div class="nav-item" onclick="showLesson(13)" id="nav-13"><div class="nav-dot"></div>Transaction ও Security</div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- LESSON 0: INTRO -->
+    <div class="lesson active" id="lesson-0">
+      <span class="lesson-badge badge-beginner">🟢 শুরু</span>
+      <h1 class="lesson-title">MySQL পরিচিতি ও ইনস্টলেশন</h1>
+      <p class="lesson-desc">MySQL হলো বিশ্বের সবচেয়ে জনপ্রিয় ওপেন-সোর্স রিলেশনাল ডেটাবেস ম্যানেজমেন্ট সিস্টেম (RDBMS)। এই পাঠে আমরা MySQL কী, কেন শিখবো এবং কীভাবে ইনস্টল করতে হয় তা শিখবো।</p>
+
+      <div class="welcome-grid">
+        <div class="welcome-card"><div class="icon">📦</div><h3>১৪টি পাঠ</h3><p>Basic থেকে Advanced</p></div>
+        <div class="welcome-card"><div class="icon">💻</div><h3>কোড উদাহরণ</h3><p>প্রতিটি বিষয়ে ব্যবহারিক কোড</p></div>
+        <div class="welcome-card"><div class="icon">🧠</div><h3>কুইজ</h3><p>শেখার পরীক্ষা নিজেই দাও</p></div>
+        <div class="welcome-card"><div class="icon">🏆</div><h3>প্রোগ্রেস</h3><p>অগ্রগতি ট্র্যাক করো</p></div>
+      </div>
+
+      <h2>MySQL কী?</h2>
+      <p>MySQL একটি <strong>Relational Database Management System (RDBMS)</strong>। এটি ডেটাকে সারি (rows) ও কলাম (columns) আকারে টেবিলে সংরক্ষণ করে। Facebook, Twitter, YouTube সহ বড় বড় কোম্পানি MySQL ব্যবহার করে।</p>
+
+      <div class="info-box">
+        <strong>💡 কেন MySQL?</strong><br>
+        ✅ বিনামূল্যে ও ওপেন সোর্স<br>
+        ✅ দ্রুত ও নির্ভরযোগ্য<br>
+        ✅ সব প্ল্যাটফর্মে চলে (Windows, Linux, Mac)<br>
+        ✅ PHP, Python, Java সব ভাষার সাথে কাজ করে
+      </div>
+
+      <h2>ইনস্টলেশন</h2>
+      <h3>Windows এ ইনস্টল করো:</h3>
+      <div class="info-box">
+        1️⃣ <strong>MySQL Installer</strong> ডাউনলোড করো: <code>mysql.com/downloads</code><br>
+        2️⃣ MySQL Server + MySQL Workbench সিলেক্ট করো<br>
+        3️⃣ Root পাসওয়ার্ড সেট করো (মনে রাখো!)<br>
+        4️⃣ Installation সম্পন্ন করো
+      </div>
+
+      <h3>MySQL Workbench দিয়ে সংযুক্ত হও:</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="cm">-- প্রথমবার লগইন করো</span>
+mysql -u root -p
+
+<span class="cm">-- পাসওয়ার্ড দাও এবং এটি দেখলে সফল:</span>
+<span class="cm">-- mysql></span>
+
+<span class="cm">-- MySQL ভার্সন দেখো</span>
+<span class="kw">SELECT</span> VERSION();</pre>
+      </div>
+
+      <h2>মূল ধারণাসমূহ</h2>
+      <div class="sql-table-wrap"><table class="sql-table">
+        <tr><th>শব্দ</th><th>অর্থ</th><th>উদাহরণ</th></tr>
+        <tr><td>Database</td><td>সম্পর্কিত টেবিলের সংগ্রহ</td><td>school_db</td></tr>
+        <tr><td>Table</td><td>সারি ও কলামে সংগঠিত ডেটা</td><td>students</td></tr>
+        <tr><td>Row/Record</td><td>একটি সম্পূর্ণ তথ্য</td><td>একজন ছাত্রের তথ্য</td></tr>
+        <tr><td>Column/Field</td><td>একটি নির্দিষ্ট বৈশিষ্ট্য</td><td>name, age, roll</td></tr>
+        <tr><td>Primary Key</td><td>অনন্য পরিচয়কারী</td><td>id</td></tr>
+        <tr><td>SQL</td><td>ডেটাবেস ভাষা</td><td>SELECT, INSERT...</td></tr>
+      </table></div>
+
+      <div class="quiz-box">
+        <h3>🧠 কুইজ</h3>
+        <p class="quiz-question">MySQL কোন ধরনের ডেটাবেস সিস্টেম?</p>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="answer(this, false)">NoSQL ডেটাবেস</button>
+          <button class="quiz-opt" onclick="answer(this, true)">Relational Database (RDBMS)</button>
+          <button class="quiz-opt" onclick="answer(this, false)">Graph Database</button>
+          <button class="quiz-opt" onclick="answer(this, false)">Key-Value Store</button>
+        </div>
+        <div class="quiz-result" id="qr"></div>
+      </div>
+
+      <div class="lesson-nav">
+        <button class="btn btn-primary" onclick="nextLesson(0)">পরের পাঠ →</button>
+      </div>
+    </div>
+
+    <!-- LESSON 1: DATABASE CREATE -->
+    <div class="lesson" id="lesson-1">
+      <span class="lesson-badge badge-beginner">🟢 শুরু</span>
+      <h1 class="lesson-title">ডেটাবেস তৈরি ও পরিচালনা</h1>
+      <p class="lesson-desc">এই পাঠে আমরা ডেটাবেস তৈরি করা, দেখা, সিলেক্ট করা এবং মুছে ফেলা শিখবো।</p>
+
+      <h2>ডেটাবেস তৈরি করো</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="cm">-- নতুন ডেটাবেস তৈরি করো</span>
+<span class="kw">CREATE DATABASE</span> <span class="tbl">school_db</span>;
+
+<span class="cm">-- যদি আগে থেকে না থাকে তাহলে তৈরি করো</span>
+<span class="kw">CREATE DATABASE IF NOT EXISTS</span> <span class="tbl">school_db</span>;
+
+<span class="cm">-- বাংলা সাপোর্টের জন্য charset সেট করো</span>
+<span class="kw">CREATE DATABASE</span> <span class="tbl">school_db</span>
+  <span class="kw">CHARACTER SET</span> utf8mb4
+  <span class="kw">COLLATE</span> utf8mb4_unicode_ci;</pre>
+      </div>
+
+      <h2>ডেটাবেস দেখো ও ব্যবহার করো</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="cm">-- সব ডেটাবেস দেখো</span>
+<span class="kw">SHOW DATABASES</span>;
+
+<span class="cm">-- একটি ডেটাবেস ব্যবহার করো</span>
+<span class="kw">USE</span> <span class="tbl">school_db</span>;
+
+<span class="cm">-- বর্তমান ডেটাবেস জানো</span>
+<span class="kw">SELECT</span> <span class="fn">DATABASE</span>();
+
+<span class="cm">-- ডেটাবেস মুছে ফেলো (সাবধান!)</span>
+<span class="kw">DROP DATABASE</span> <span class="tbl">school_db</span>;
+<span class="kw">DROP DATABASE IF EXISTS</span> <span class="tbl">school_db</span>;</pre>
+      </div>
+
+      <div class="info-box warning">
+        <strong>⚠️ সতর্কতা:</strong> DROP DATABASE চালালে সব ডেটা চিরতরে মুছে যাবে। সাবধানে ব্যবহার করো!
+      </div>
+
+      <h2>ডেটা টাইপ পরিচিতি</h2>
+      <div class="sql-table-wrap"><table class="sql-table">
+        <tr><th>ডেটা টাইপ</th><th>ব্যবহার</th><th>উদাহরণ</th></tr>
+        <tr><td>INT</td><td>পূর্ণ সংখ্যা</td><td>বয়স, রোল নম্বর</td></tr>
+        <tr><td>VARCHAR(n)</td><td>পরিবর্তনশীল টেক্সট</td><td>নাম, ঠিকানা</td></tr>
+        <tr><td>TEXT</td><td>বড় টেক্সট</td><td>বিবরণ, মন্তব্য</td></tr>
+        <tr><td>FLOAT/DECIMAL</td><td>দশমিক সংখ্যা</td><td>মার্কস, মূল্য</td></tr>
+        <tr><td>DATE</td><td>তারিখ</td><td>জন্ম তারিখ</td></tr>
+        <tr><td>DATETIME</td><td>তারিখ ও সময়</td><td>রেজিস্ট্রেশন সময়</td></tr>
+        <tr><td>BOOLEAN</td><td>সত্য/মিথ্যা</td><td>active, verified</td></tr>
+      </table></div>
+
+      <div class="quiz-box">
+        <h3>🧠 কুইজ</h3>
+        <p class="quiz-question">ছাত্রের নাম সংরক্ষণের জন্য কোন ডেটা টাইপ সবচেয়ে উপযুক্ত?</p>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="answer(this, false)">INT</button>
+          <button class="quiz-opt" onclick="answer(this, true)">VARCHAR(100)</button>
+          <button class="quiz-opt" onclick="answer(this, false)">DATE</button>
+          <button class="quiz-opt" onclick="answer(this, false)">BOOLEAN</button>
+        </div>
+        <div class="quiz-result" id="qr"></div>
+      </div>
+
+      <div class="lesson-nav">
+        <button class="btn btn-secondary" onclick="prevLesson(1)">← আগের পাঠ</button>
+        <button class="btn btn-primary" onclick="nextLesson(1)">পরের পাঠ →</button>
+      </div>
+    </div>
+
+    <!-- LESSON 2: TABLE CREATE -->
+    <div class="lesson" id="lesson-2">
+      <span class="lesson-badge badge-beginner">🟢 শুরু</span>
+      <h1 class="lesson-title">টেবিল তৈরি করা</h1>
+      <p class="lesson-desc">টেবিল হলো ডেটাবেসের মূল কাঠামো। এখানে ডেটা সারিবদ্ধভাবে সংরক্ষিত হয়।</p>
+
+      <h2>টেবিল তৈরি করো</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="kw">USE</span> <span class="tbl">school_db</span>;
+
+<span class="kw">CREATE TABLE</span> <span class="tbl">students</span> (
+  <span class="col">id</span>         <span class="kw">INT AUTO_INCREMENT PRIMARY KEY</span>,
+  <span class="col">name</span>       <span class="kw">VARCHAR</span>(<span class="num">100</span>) <span class="kw">NOT NULL</span>,
+  <span class="col">roll</span>       <span class="kw">INT UNIQUE NOT NULL</span>,
+  <span class="col">class</span>      <span class="kw">VARCHAR</span>(<span class="num">20</span>),
+  <span class="col">marks</span>      <span class="kw">DECIMAL</span>(<span class="num">5</span>,<span class="num">2</span>) <span class="kw">DEFAULT</span> <span class="num">0.00</span>,
+  <span class="col">dob</span>        <span class="kw">DATE</span>,
+  <span class="col">is_active</span>  <span class="kw">BOOLEAN DEFAULT TRUE</span>,
+  <span class="col">created_at</span> <span class="kw">DATETIME DEFAULT CURRENT_TIMESTAMP</span>
+);</pre>
+      </div>
+
+      <h2>Constraint মানে কী?</h2>
+      <div class="sql-table-wrap"><table class="sql-table">
+        <tr><th>Constraint</th><th>অর্থ</th></tr>
+        <tr><td>PRIMARY KEY</td><td>টেবিলের প্রতিটি সারির অনন্য পরিচয়</td></tr>
+        <tr><td>NOT NULL</td><td>এই কলাম খালি রাখা যাবে না</td></tr>
+        <tr><td>UNIQUE</td><td>একই মান দুইবার থাকতে পারবে না</td></tr>
+        <tr><td>DEFAULT</td><td>কোনো মান না দিলে এটি ব্যবহার হবে</td></tr>
+        <tr><td>AUTO_INCREMENT</td><td>স্বয়ংক্রিয়ভাবে ১ বাড়বে</td></tr>
+        <tr><td>FOREIGN KEY</td><td>অন্য টেবিলের সাথে সংযোগ</td></tr>
+      </table></div>
+
+      <h2>টেবিল দেখো ও পরিবর্তন করো</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="cm">-- সব টেবিল দেখো</span>
+<span class="kw">SHOW TABLES</span>;
+
+<span class="cm">-- টেবিলের কাঠামো দেখো</span>
+<span class="kw">DESCRIBE</span> <span class="tbl">students</span>;
+
+<span class="cm">-- নতুন কলাম যোগ করো</span>
+<span class="kw">ALTER TABLE</span> <span class="tbl">students</span> <span class="kw">ADD</span> <span class="col">email</span> <span class="kw">VARCHAR</span>(<span class="num">150</span>);
+
+<span class="cm">-- কলামের নাম পরিবর্তন করো</span>
+<span class="kw">ALTER TABLE</span> <span class="tbl">students</span>
+  <span class="kw">RENAME COLUMN</span> <span class="col">marks</span> <span class="kw">TO</span> <span class="col">total_marks</span>;
+
+<span class="cm">-- কলাম মুছে ফেলো</span>
+<span class="kw">ALTER TABLE</span> <span class="tbl">students</span> <span class="kw">DROP COLUMN</span> <span class="col">email</span>;
+
+<span class="cm">-- টেবিল মুছে ফেলো</span>
+<span class="kw">DROP TABLE</span> <span class="tbl">students</span>;</pre>
+      </div>
+
+      <div class="quiz-box">
+        <h3>🧠 কুইজ</h3>
+        <p class="quiz-question">AUTO_INCREMENT কী কাজ করে?</p>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="answer(this, false)">ডেটা স্বয়ংক্রিয়ভাবে মুছে ফেলে</button>
+          <button class="quiz-opt" onclick="answer(this, false)">কলামের মান শূন্য করে</button>
+          <button class="quiz-opt" onclick="answer(this, true)">প্রতি নতুন সারিতে স্বয়ংক্রিয়ভাবে ১ বাড়িয়ে দেয়</button>
+          <button class="quiz-opt" onclick="answer(this, false)">ডেটা আপডেট করে</button>
+        </div>
+        <div class="quiz-result" id="qr"></div>
+      </div>
+
+      <div class="lesson-nav">
+        <button class="btn btn-secondary" onclick="prevLesson(2)">← আগের পাঠ</button>
+        <button class="btn btn-primary" onclick="nextLesson(2)">পরের পাঠ →</button>
+      </div>
+    </div>
+
+    <!-- LESSON 3: INSERT -->
+    <div class="lesson" id="lesson-3">
+      <span class="lesson-badge badge-beginner">🟢 শুরু</span>
+      <h1 class="lesson-title">ডেটা ইনসার্ট করা (INSERT)</h1>
+      <p class="lesson-desc">টেবিলে ডেটা যোগ করতে INSERT INTO ব্যবহার করা হয়।</p>
+
+      <h2>একটি সারি যোগ করো</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="cm">-- সব কলামে ডেটা দাও</span>
+<span class="kw">INSERT INTO</span> <span class="tbl">students</span> (<span class="col">name</span>, <span class="col">roll</span>, <span class="col">class</span>, <span class="col">marks</span>, <span class="col">dob</span>)
+<span class="kw">VALUES</span> (<span class="str">'আরিফ হোসেন'</span>, <span class="num">101</span>, <span class="str">'দশম'</span>, <span class="num">87.50</span>, <span class="str">'2008-03-15'</span>);
+
+<span class="cm">-- id এবং created_at স্বয়ংক্রিয়ভাবে যোগ হবে</span></pre>
+      </div>
+
+      <h2>একসাথে একাধিক সারি যোগ করো</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="kw">INSERT INTO</span> <span class="tbl">students</span> (<span class="col">name</span>, <span class="col">roll</span>, <span class="col">class</span>, <span class="col">marks</span>)
+<span class="kw">VALUES</span>
+  (<span class="str">'সুমাইয়া বেগম'</span>, <span class="num">102</span>, <span class="str">'দশম'</span>, <span class="num">92.00</span>),
+  (<span class="str">'রাকিব হাসান'</span>,  <span class="num">103</span>, <span class="str">'নবম'</span>,  <span class="num">78.50</span>),
+  (<span class="str">'তানভীর আলম'</span>,  <span class="num">104</span>, <span class="str">'নবম'</span>,  <span class="num">85.00</span>),
+  (<span class="str">'নিশাত জাহান'</span>, <span class="num">105</span>, <span class="str">'দশম'</span>, <span class="num">95.50</span>);</pre>
+      </div>
+
+      <div class="info-box tip">
+        <strong>💡 টিপস:</strong> যে কলামে DEFAULT বা AUTO_INCREMENT আছে সেটি ইনসার্টে বাদ দেওয়া যায়। NOT NULL কলাম অবশ্যই দিতে হবে।
+      </div>
+
+      <h2>ডেটা দেখো</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="cm">-- সব ডেটা দেখো</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">students</span>;
+
+<span class="cm">-- শেষ ইনসার্টের ID জানো</span>
+<span class="kw">SELECT</span> <span class="fn">LAST_INSERT_ID</span>();</pre>
+      </div>
+
+      <div class="quiz-box">
+        <h3>🧠 কুইজ</h3>
+        <p class="quiz-question">একসাথে ৩টি সারি ইনসার্ট করতে কোন পদ্ধতি সবচেয়ে ভালো?</p>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="answer(this, false)">৩টি আলাদা INSERT চালাও</button>
+          <button class="quiz-opt" onclick="answer(this, true)">একটি INSERT এ VALUES এ ৩টি সারি দাও</button>
+          <button class="quiz-opt" onclick="answer(this, false)">UPDATE ব্যবহার করো</button>
+        </div>
+        <div class="quiz-result" id="qr"></div>
+      </div>
+
+      <div class="lesson-nav">
+        <button class="btn btn-secondary" onclick="prevLesson(3)">← আগের পাঠ</button>
+        <button class="btn btn-primary" onclick="nextLesson(3)">পরের পাঠ →</button>
+      </div>
+    </div>
+
+    <!-- LESSON 4: SELECT WHERE -->
+    <div class="lesson" id="lesson-4">
+      <span class="lesson-badge badge-intermediate">🔵 মধ্যবর্তী</span>
+      <h1 class="lesson-title">SELECT ও WHERE দিয়ে ডেটা খোঁজো</h1>
+      <p class="lesson-desc">SELECT হলো MySQL এর সবচেয়ে বেশি ব্যবহৃত কমান্ড। WHERE দিয়ে শর্ত দিয়ে নির্দিষ্ট ডেটা খোঁজা যায়।</p>
+
+      <h2>SELECT এর মূল ব্যবহার</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="cm">-- সব কলাম দেখো</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">students</span>;
+
+<span class="cm">-- নির্দিষ্ট কলাম দেখো</span>
+<span class="kw">SELECT</span> <span class="col">name</span>, <span class="col">roll</span>, <span class="col">marks</span> <span class="kw">FROM</span> <span class="tbl">students</span>;
+
+<span class="cm">-- কলামের নাম পরিবর্তন করে দেখাও (Alias)</span>
+<span class="kw">SELECT</span> <span class="col">name</span> <span class="kw">AS</span> <span class="str">'ছাত্রের নাম'</span>, <span class="col">marks</span> <span class="kw">AS</span> <span class="str">'নম্বর'</span>
+<span class="kw">FROM</span> <span class="tbl">students</span>;</pre>
+      </div>
+
+      <h2>WHERE দিয়ে শর্ত দাও</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="cm">-- নির্দিষ্ট ক্লাসের ছাত্র</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">WHERE</span> <span class="col">class</span> = <span class="str">'দশম'</span>;
+
+<span class="cm">-- ৮০ এর উপরে নম্বর পেয়েছে</span>
+<span class="kw">SELECT</span> <span class="col">name</span>, <span class="col">marks</span> <span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">WHERE</span> <span class="col">marks</span> > <span class="num">80</span>;
+
+<span class="cm">-- AND / OR ব্যবহার</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">WHERE</span> <span class="col">class</span> = <span class="str">'দশম'</span> <span class="kw">AND</span> <span class="col">marks</span> > <span class="num">85</span>;
+
+<span class="cm">-- BETWEEN ব্যবহার</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">WHERE</span> <span class="col">marks</span> <span class="kw">BETWEEN</span> <span class="num">70</span> <span class="kw">AND</span> <span class="num">90</span>;
+
+<span class="cm">-- LIKE ব্যবহার (আংশিক মিলানো)</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">WHERE</span> <span class="col">name</span> <span class="kw">LIKE</span> <span class="str">'%হাসান%'</span>;
+
+<span class="cm">-- IN ব্যবহার</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">WHERE</span> <span class="col">roll</span> <span class="kw">IN</span> (<span class="num">101</span>, <span class="num">103</span>, <span class="num">105</span>);
+
+<span class="cm">-- NULL চেক</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">WHERE</span> <span class="col">dob</span> <span class="kw">IS NULL</span>;</pre>
+      </div>
+
+      <h2>তুলনামূলক অপারেটর</h2>
+      <div class="sql-table-wrap"><table class="sql-table">
+        <tr><th>অপারেটর</th><th>অর্থ</th><th>উদাহরণ</th></tr>
+        <tr><td>=</td><td>সমান</td><td>marks = 90</td></tr>
+        <tr><td>!= বা &lt;&gt;</td><td>সমান নয়</td><td>class != 'নবম'</td></tr>
+        <tr><td>&gt;</td><td>বড়</td><td>marks > 80</td></tr>
+        <tr><td>&lt;</td><td>ছোট</td><td>roll < 110</td></tr>
+        <tr><td>LIKE '%x%'</td><td>আংশিক মিলানো</td><td>name LIKE '%আলম%'</td></tr>
+        <tr><td>BETWEEN a AND b</td><td>পরিসরের মধ্যে</td><td>marks BETWEEN 60 AND 80</td></tr>
+      </table></div>
+
+      <div class="quiz-box">
+        <h3>🧠 কুইজ</h3>
+        <p class="quiz-question">"রাহিম" নামের অংশ আছে এমন সব ছাত্র খুঁজতে কোনটি ব্যবহার করবো?</p>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="answer(this, false)">WHERE name = 'রাহিম'</button>
+          <button class="quiz-opt" onclick="answer(this, true)">WHERE name LIKE '%রাহিম%'</button>
+          <button class="quiz-opt" onclick="answer(this, false)">WHERE name IN ('রাহিম')</button>
+          <button class="quiz-opt" onclick="answer(this, false)">WHERE name BETWEEN 'রাহিম'</button>
+        </div>
+        <div class="quiz-result" id="qr"></div>
+      </div>
+
+      <div class="lesson-nav">
+        <button class="btn btn-secondary" onclick="prevLesson(4)">← আগের পাঠ</button>
+        <button class="btn btn-primary" onclick="nextLesson(4)">পরের পাঠ →</button>
+      </div>
+    </div>
+
+    <!-- LESSON 5: UPDATE DELETE -->
+    <div class="lesson" id="lesson-5">
+      <span class="lesson-badge badge-intermediate">🔵 মধ্যবর্তী</span>
+      <h1 class="lesson-title">UPDATE ও DELETE</h1>
+      <p class="lesson-desc">ডেটা পরিবর্তন করতে UPDATE এবং মুছতে DELETE ব্যবহার করা হয়।</p>
+
+      <h2>UPDATE — ডেটা পরিবর্তন করো</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="cm">-- একটি নির্দিষ্ট সারি আপডেট করো</span>
+<span class="kw">UPDATE</span> <span class="tbl">students</span>
+<span class="kw">SET</span> <span class="col">marks</span> = <span class="num">95.00</span>
+<span class="kw">WHERE</span> <span class="col">roll</span> = <span class="num">101</span>;
+
+<span class="cm">-- একাধিক কলাম আপডেট করো</span>
+<span class="kw">UPDATE</span> <span class="tbl">students</span>
+<span class="kw">SET</span> <span class="col">marks</span> = <span class="num">88.00</span>, <span class="col">class</span> = <span class="str">'একাদশ'</span>
+<span class="kw">WHERE</span> <span class="col">id</span> = <span class="num">3</span>;
+
+<span class="cm">-- সবার নম্বরে ৫ যোগ করো</span>
+<span class="kw">UPDATE</span> <span class="tbl">students</span>
+<span class="kw">SET</span> <span class="col">marks</span> = <span class="col">marks</span> + <span class="num">5</span>
+<span class="kw">WHERE</span> <span class="col">class</span> = <span class="str">'দশম'</span>;</pre>
+      </div>
+
+      <div class="info-box warning">
+        <strong>⚠️ গুরুত্বপূর্ণ:</strong> UPDATE এ সবসময় WHERE ব্যবহার করো! না হলে সব সারির ডেটা পরিবর্তন হয়ে যাবে।
+      </div>
+
+      <h2>DELETE — ডেটা মুছে ফেলো</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="cm">-- একটি নির্দিষ্ট সারি মুছো</span>
+<span class="kw">DELETE FROM</span> <span class="tbl">students</span>
+<span class="kw">WHERE</span> <span class="col">roll</span> = <span class="num">104</span>;
+
+<span class="cm">-- শর্ত অনুযায়ী মুছো</span>
+<span class="kw">DELETE FROM</span> <span class="tbl">students</span>
+<span class="kw">WHERE</span> <span class="col">marks</span> < <span class="num">50</span>;
+
+<span class="cm">-- সব ডেটা মুছো (কাঠামো থাকবে)</span>
+<span class="kw">TRUNCATE TABLE</span> <span class="tbl">students</span>;</pre>
+      </div>
+
+      <h2>TRUNCATE বনাম DELETE</h2>
+      <div class="sql-table-wrap"><table class="sql-table">
+        <tr><th>বিষয়</th><th>DELETE</th><th>TRUNCATE</th></tr>
+        <tr><td>শর্ত দেওয়া যায়?</td><td>✅ হ্যাঁ (WHERE)</td><td>❌ না</td></tr>
+        <tr><td>Rollback সম্ভব?</td><td>✅ হ্যাঁ</td><td>❌ সাধারণত না</td></tr>
+        <tr><td>গতি</td><td>ধীর (সারিভিত্তিক)</td><td>দ্রুত (পুরো টেবিল)</td></tr>
+        <tr><td>AUTO_INCREMENT রিসেট?</td><td>❌ না</td><td>✅ হ্যাঁ</td></tr>
+      </table></div>
+
+      <div class="quiz-box">
+        <h3>🧠 কুইজ</h3>
+        <p class="quiz-question">UPDATE চালানোর সময় WHERE না দিলে কী হবে?</p>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="answer(this, false)">কোনো পরিবর্তন হবে না</button>
+          <button class="quiz-opt" onclick="answer(this, false)">Error আসবে</button>
+          <button class="quiz-opt" onclick="answer(this, true)">টেবিলের সব সারি আপডেট হয়ে যাবে</button>
+          <button class="quiz-opt" onclick="answer(this, false)">শুধু প্রথম সারি আপডেট হবে</button>
+        </div>
+        <div class="quiz-result" id="qr"></div>
+      </div>
+
+      <div class="lesson-nav">
+        <button class="btn btn-secondary" onclick="prevLesson(5)">← আগের পাঠ</button>
+        <button class="btn btn-primary" onclick="nextLesson(5)">পরের পাঠ →</button>
+      </div>
+    </div>
+
+    <!-- LESSON 6: ORDER BY LIMIT -->
+    <div class="lesson" id="lesson-6">
+      <span class="lesson-badge badge-intermediate">🔵 মধ্যবর্তী</span>
+      <h1 class="lesson-title">ORDER BY ও LIMIT</h1>
+      <p class="lesson-desc">ফলাফল সাজানো এবং নির্দিষ্ট সংখ্যক সারি দেখানোর জন্য ORDER BY ও LIMIT ব্যবহার করা হয়।</p>
+
+      <h2>ORDER BY — ফলাফল সাজাও</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="cm">-- নম্বর অনুযায়ী ছোট থেকে বড় (ASC)</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">ORDER BY</span> <span class="col">marks</span> <span class="kw">ASC</span>;
+
+<span class="cm">-- নম্বর অনুযায়ী বড় থেকে ছোট (DESC)</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">ORDER BY</span> <span class="col">marks</span> <span class="kw">DESC</span>;
+
+<span class="cm">-- নাম অনুযায়ী বর্ণানুক্রমে</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">ORDER BY</span> <span class="col">name</span> <span class="kw">ASC</span>;
+
+<span class="cm">-- একাধিক কলামে সাজাও</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">ORDER BY</span> <span class="col">class</span> <span class="kw">ASC</span>, <span class="col">marks</span> <span class="kw">DESC</span>;</pre>
+      </div>
+
+      <h2>LIMIT — নির্দিষ্ট সংখ্যক সারি দেখাও</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="cm">-- প্রথম ৫টি ছাত্র</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">students</span> <span class="kw">LIMIT</span> <span class="num">5</span>;
+
+<span class="cm">-- সর্বোচ্চ নম্বর পাওয়া ৩ জন</span>
+<span class="kw">SELECT</span> <span class="col">name</span>, <span class="col">marks</span> <span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">ORDER BY</span> <span class="col">marks</span> <span class="kw">DESC</span>
+<span class="kw">LIMIT</span> <span class="num">3</span>;
+
+<span class="cm">-- OFFSET: ৬ নম্বর থেকে ১০ নম্বর সারি (Pagination)</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">LIMIT</span> <span class="num">5</span> <span class="kw">OFFSET</span> <span class="num">5</span>;
+<span class="cm">-- অথবা সংক্ষেপে: LIMIT 5, 5</span>
+
+<span class="cm">-- DISTINCT: অনন্য মান দেখাও</span>
+<span class="kw">SELECT DISTINCT</span> <span class="col">class</span> <span class="kw">FROM</span> <span class="tbl">students</span>;</pre>
+      </div>
+
+      <div class="info-box">
+        <strong>📌 Pagination উদাহরণ:</strong><br>
+        Page 1: LIMIT 10 OFFSET 0<br>
+        Page 2: LIMIT 10 OFFSET 10<br>
+        Page 3: LIMIT 10 OFFSET 20
+      </div>
+
+      <div class="quiz-box">
+        <h3>🧠 কুইজ</h3>
+        <p class="quiz-question">সর্বনিম্ন নম্বর পাওয়া ১ জন ছাত্র দেখাতে কোনটি সঠিক?</p>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="answer(this, false)">SELECT * FROM students ORDER BY marks DESC LIMIT 1</button>
+          <button class="quiz-opt" onclick="answer(this, true)">SELECT * FROM students ORDER BY marks ASC LIMIT 1</button>
+          <button class="quiz-opt" onclick="answer(this, false)">SELECT * FROM students LIMIT 1</button>
+        </div>
+        <div class="quiz-result" id="qr"></div>
+      </div>
+
+      <div class="lesson-nav">
+        <button class="btn btn-secondary" onclick="prevLesson(6)">← আগের পাঠ</button>
+        <button class="btn btn-primary" onclick="nextLesson(6)">পরের পাঠ →</button>
+      </div>
+    </div>
+
+    <!-- LESSON 7: FUNCTIONS -->
+    <div class="lesson" id="lesson-7">
+      <span class="lesson-badge badge-intermediate">🔵 মধ্যবর্তী</span>
+      <h1 class="lesson-title">ফাংশন ও Aggregate</h1>
+      <p class="lesson-desc">MySQL এ বিভিন্ন বিল্ট-ইন ফাংশন আছে যা ডেটা প্রক্রিয়া করতে সাহায্য করে।</p>
+
+      <h2>Aggregate ফাংশন (গণনা করার জন্য)</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="cm">-- মোট ছাত্র সংখ্যা</span>
+<span class="kw">SELECT</span> <span class="fn">COUNT</span>(*) <span class="kw">AS</span> মোট_ছাত্র <span class="kw">FROM</span> <span class="tbl">students</span>;
+
+<span class="cm">-- সর্বোচ্চ নম্বর</span>
+<span class="kw">SELECT</span> <span class="fn">MAX</span>(<span class="col">marks</span>) <span class="kw">AS</span> সর্বোচ্চ <span class="kw">FROM</span> <span class="tbl">students</span>;
+
+<span class="cm">-- সর্বনিম্ন নম্বর</span>
+<span class="kw">SELECT</span> <span class="fn">MIN</span>(<span class="col">marks</span>) <span class="kw">AS</span> সর্বনিম্ন <span class="kw">FROM</span> <span class="tbl">students</span>;
+
+<span class="cm">-- নম্বরের যোগফল</span>
+<span class="kw">SELECT</span> <span class="fn">SUM</span>(<span class="col">marks</span>) <span class="kw">AS</span> মোট_নম্বর <span class="kw">FROM</span> <span class="tbl">students</span>;
+
+<span class="cm">-- গড় নম্বর</span>
+<span class="kw">SELECT</span> <span class="fn">AVG</span>(<span class="col">marks</span>) <span class="kw">AS</span> গড়_নম্বর <span class="kw">FROM</span> <span class="tbl">students</span>;
+
+<span class="cm">-- একসাথে সব দেখাও</span>
+<span class="kw">SELECT</span>
+  <span class="fn">COUNT</span>(*) <span class="kw">AS</span> মোট,
+  <span class="fn">MAX</span>(<span class="col">marks</span>) <span class="kw">AS</span> সর্বোচ্চ,
+  <span class="fn">MIN</span>(<span class="col">marks</span>) <span class="kw">AS</span> সর্বনিম্ন,
+  <span class="fn">ROUND</span>(<span class="fn">AVG</span>(<span class="col">marks</span>), <span class="num">2</span>) <span class="kw">AS</span> গড়
+<span class="kw">FROM</span> <span class="tbl">students</span>;</pre>
+      </div>
+
+      <h2>String ফাংশন</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="kw">SELECT</span>
+  <span class="fn">UPPER</span>(<span class="col">name</span>),        <span class="cm">-- বড় হাতে</span>
+  <span class="fn">LOWER</span>(<span class="col">name</span>),        <span class="cm">-- ছোট হাতে</span>
+  <span class="fn">LENGTH</span>(<span class="col">name</span>),       <span class="cm">-- অক্ষর সংখ্যা</span>
+  <span class="fn">CONCAT</span>(<span class="col">name</span>, <span class="str">' - '</span>, <span class="col">class</span>),  <span class="cm">-- যোগ করো</span>
+  <span class="fn">SUBSTRING</span>(<span class="col">name</span>, <span class="num">1</span>, <span class="num">5</span>),       <span class="cm">-- অংশ নাও</span>
+  <span class="fn">TRIM</span>(<span class="col">name</span>)           <span class="cm">-- আগে-পরের ফাঁকা সরাও</span>
+<span class="kw">FROM</span> <span class="tbl">students</span>;</pre>
+      </div>
+
+      <h2>Date ফাংশন</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="kw">SELECT</span>
+  <span class="fn">NOW</span>(),              <span class="cm">-- এখনকার তারিখ ও সময়</span>
+  <span class="fn">CURDATE</span>(),          <span class="cm">-- আজকের তারিখ</span>
+  <span class="fn">YEAR</span>(<span class="col">dob</span>),          <span class="cm">-- জন্মের বছর</span>
+  <span class="fn">MONTH</span>(<span class="col">dob</span>),         <span class="cm">-- জন্মের মাস</span>
+  <span class="fn">DATEDIFF</span>(<span class="fn">CURDATE</span>(), <span class="col">dob</span>) / <span class="num">365</span> <span class="kw">AS</span> বয়স
+<span class="kw">FROM</span> <span class="tbl">students</span>;</pre>
+      </div>
+
+      <div class="lesson-nav">
+        <button class="btn btn-secondary" onclick="prevLesson(7)">← আগের পাঠ</button>
+        <button class="btn btn-primary" onclick="nextLesson(7)">পরের পাঠ →</button>
+      </div>
+    </div>
+
+    <!-- LESSON 8: GROUP BY -->
+    <div class="lesson" id="lesson-8">
+      <span class="lesson-badge badge-intermediate">🔵 মধ্যবর্তী</span>
+      <h1 class="lesson-title">GROUP BY ও HAVING</h1>
+      <p class="lesson-desc">GROUP BY দিয়ে ডেটা দলভিত্তিক বিশ্লেষণ করা যায়। HAVING দিয়ে গ্রুপের উপর শর্ত দেওয়া হয়।</p>
+
+      <h2>GROUP BY — দলভিত্তিক বিশ্লেষণ</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="cm">-- ক্লাসভিত্তিক ছাত্র সংখ্যা</span>
+<span class="kw">SELECT</span> <span class="col">class</span>, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> ছাত্র_সংখ্যা
+<span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">GROUP BY</span> <span class="col">class</span>;
+
+<span class="cm">-- ক্লাসভিত্তিক গড় নম্বর</span>
+<span class="kw">SELECT</span>
+  <span class="col">class</span>,
+  <span class="fn">COUNT</span>(*) <span class="kw">AS</span> সংখ্যা,
+  <span class="fn">ROUND</span>(<span class="fn">AVG</span>(<span class="col">marks</span>), <span class="num">2</span>) <span class="kw">AS</span> গড়_নম্বর,
+  <span class="fn">MAX</span>(<span class="col">marks</span>) <span class="kw">AS</span> সর্বোচ্চ
+<span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">GROUP BY</span> <span class="col">class</span>
+<span class="kw">ORDER BY</span> গড়_নম্বর <span class="kw">DESC</span>;</pre>
+      </div>
+
+      <h2>HAVING — গ্রুপে শর্ত দাও</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="cm">-- যে ক্লাসে ৩ বা বেশি ছাত্র আছে</span>
+<span class="kw">SELECT</span> <span class="col">class</span>, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> সংখ্যা
+<span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">GROUP BY</span> <span class="col">class</span>
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) >= <span class="num">3</span>;
+
+<span class="cm">-- যে ক্লাসের গড় নম্বর ৮০ এর উপরে</span>
+<span class="kw">SELECT</span> <span class="col">class</span>, <span class="fn">AVG</span>(<span class="col">marks</span>) <span class="kw">AS</span> গড়
+<span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">GROUP BY</span> <span class="col">class</span>
+<span class="kw">HAVING</span> <span class="fn">AVG</span>(<span class="col">marks</span>) > <span class="num">80</span>;</pre>
+      </div>
+
+      <div class="info-box">
+        <strong>WHERE বনাম HAVING:</strong><br>
+        📌 WHERE — সারি ফিল্টার করে (GROUP BY এর আগে)<br>
+        📌 HAVING — গ্রুপ ফিল্টার করে (GROUP BY এর পরে)
+      </div>
+
+      <div class="lesson-nav">
+        <button class="btn btn-secondary" onclick="prevLesson(8)">← আগের পাঠ</button>
+        <button class="btn btn-primary" onclick="nextLesson(8)">পরের পাঠ →</button>
+      </div>
+    </div>
+
+    <!-- LESSON 9: JOIN -->
+    <div class="lesson" id="lesson-9">
+      <span class="lesson-badge badge-advanced">🔴 উন্নত</span>
+      <h1 class="lesson-title">JOIN — টেবিল সংযুক্তি</h1>
+      <p class="lesson-desc">JOIN দিয়ে একাধিক টেবিলের ডেটা একসাথে দেখা যায়। এটি MySQL এর সবচেয়ে গুরুত্বপূর্ণ বিষয়গুলোর একটি।</p>
+
+      <h2>উদাহরণ টেবিল তৈরি করো</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="cm">-- শিক্ষক টেবিল</span>
+<span class="kw">CREATE TABLE</span> <span class="tbl">teachers</span> (
+  <span class="col">id</span>      <span class="kw">INT AUTO_INCREMENT PRIMARY KEY</span>,
+  <span class="col">name</span>    <span class="kw">VARCHAR</span>(<span class="num">100</span>),
+  <span class="col">subject</span> <span class="kw">VARCHAR</span>(<span class="num">50</span>)
+);
+
+<span class="cm">-- students টেবিলে teacher_id যোগ করো</span>
+<span class="kw">ALTER TABLE</span> <span class="tbl">students</span>
+  <span class="kw">ADD COLUMN</span> <span class="col">teacher_id</span> <span class="kw">INT</span>,
+  <span class="kw">ADD FOREIGN KEY</span> (<span class="col">teacher_id</span>) <span class="kw">REFERENCES</span> <span class="tbl">teachers</span>(<span class="col">id</span>);</pre>
+      </div>
+
+      <h2>INNER JOIN — উভয় টেবিলে মিলে এমন</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="kw">SELECT</span>
+  s.<span class="col">name</span> <span class="kw">AS</span> ছাত্র,
+  s.<span class="col">marks</span>,
+  t.<span class="col">name</span> <span class="kw">AS</span> শিক্ষক,
+  t.<span class="col">subject</span>
+<span class="kw">FROM</span> <span class="tbl">students</span> s
+<span class="kw">INNER JOIN</span> <span class="tbl">teachers</span> t
+  <span class="kw">ON</span> s.<span class="col">teacher_id</span> = t.<span class="col">id</span>;</pre>
+      </div>
+
+      <h2>LEFT JOIN ও RIGHT JOIN</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="cm">-- LEFT JOIN: সব ছাত্র দেখাও (শিক্ষক না থাকলেও)</span>
+<span class="kw">SELECT</span> s.<span class="col">name</span>, t.<span class="col">name</span> <span class="kw">AS</span> শিক্ষক
+<span class="kw">FROM</span> <span class="tbl">students</span> s
+<span class="kw">LEFT JOIN</span> <span class="tbl">teachers</span> t <span class="kw">ON</span> s.<span class="col">teacher_id</span> = t.<span class="col">id</span>;
+
+<span class="cm">-- RIGHT JOIN: সব শিক্ষক দেখাও (ছাত্র না থাকলেও)</span>
+<span class="kw">SELECT</span> s.<span class="col">name</span>, t.<span class="col">name</span> <span class="kw">AS</span> শিক্ষক
+<span class="kw">FROM</span> <span class="tbl">students</span> s
+<span class="kw">RIGHT JOIN</span> <span class="tbl">teachers</span> t <span class="kw">ON</span> s.<span class="col">teacher_id</span> = t.<span class="col">id</span>;</pre>
+      </div>
+
+      <h2>JOIN এর ধরন</h2>
+      <div class="sql-table-wrap"><table class="sql-table">
+        <tr><th>JOIN</th><th>ফলাফল</th></tr>
+        <tr><td>INNER JOIN</td><td>উভয় টেবিলে মিলে এমন সারি</td></tr>
+        <tr><td>LEFT JOIN</td><td>বাম টেবিলের সব + মিলে যাওয়া</td></tr>
+        <tr><td>RIGHT JOIN</td><td>ডান টেবিলের সব + মিলে যাওয়া</td></tr>
+        <tr><td>CROSS JOIN</td><td>সব সম্ভাব্য সংমিশ্রণ</td></tr>
+      </table></div>
+
+      <div class="lesson-nav">
+        <button class="btn btn-secondary" onclick="prevLesson(9)">← আগের পাঠ</button>
+        <button class="btn btn-primary" onclick="nextLesson(9)">পরের পাঠ →</button>
+      </div>
+    </div>
+
+    <!-- LESSON 10: SUBQUERY -->
+    <div class="lesson" id="lesson-10">
+      <span class="lesson-badge badge-advanced">🔴 উন্নত</span>
+      <h1 class="lesson-title">Subquery (উপ-প্রশ্ন)</h1>
+      <p class="lesson-desc">Subquery হলো একটি Query এর ভেতরে আরেকটি Query। জটিল প্রশ্নের উত্তর দিতে এটি ব্যবহার হয়।</p>
+
+      <h2>WHERE এ Subquery</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="cm">-- গড়ের উপরে নম্বর পাওয়া ছাত্র</span>
+<span class="kw">SELECT</span> <span class="col">name</span>, <span class="col">marks</span>
+<span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">WHERE</span> <span class="col">marks</span> > (
+  <span class="kw">SELECT</span> <span class="fn">AVG</span>(<span class="col">marks</span>) <span class="kw">FROM</span> <span class="tbl">students</span>
+);
+
+<span class="cm">-- সর্বোচ্চ নম্বর পাওয়া ছাত্র</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">WHERE</span> <span class="col">marks</span> = (
+  <span class="kw">SELECT</span> <span class="fn">MAX</span>(<span class="col">marks</span>) <span class="kw">FROM</span> <span class="tbl">students</span>
+);</pre>
+      </div>
+
+      <h2>FROM এ Subquery (Derived Table)</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="cm">-- ক্লাসভিত্তিক গড় থেকে শীর্ষ ক্লাস</span>
+<span class="kw">SELECT</span> *
+<span class="kw">FROM</span> (
+  <span class="kw">SELECT</span> <span class="col">class</span>, <span class="fn">AVG</span>(<span class="col">marks</span>) <span class="kw">AS</span> গড়
+  <span class="kw">FROM</span> <span class="tbl">students</span>
+  <span class="kw">GROUP BY</span> <span class="col">class</span>
+) <span class="kw">AS</span> class_avg
+<span class="kw">WHERE</span> গড় > <span class="num">80</span>;</pre>
+      </div>
+
+      <h2>EXISTS Subquery</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="cm">-- যাদের teacher_id আছে</span>
+<span class="kw">SELECT</span> <span class="col">name</span> <span class="kw">FROM</span> <span class="tbl">students</span> s
+<span class="kw">WHERE EXISTS</span> (
+  <span class="kw">SELECT</span> <span class="num">1</span> <span class="kw">FROM</span> <span class="tbl">teachers</span> t
+  <span class="kw">WHERE</span> t.<span class="col">id</span> = s.<span class="col">teacher_id</span>
+);</pre>
+      </div>
+
+      <div class="lesson-nav">
+        <button class="btn btn-secondary" onclick="prevLesson(10)">← আগের পাঠ</button>
+        <button class="btn btn-primary" onclick="nextLesson(10)">পরের পাঠ →</button>
+      </div>
+    </div>
+
+    <!-- LESSON 11: INDEX -->
+    <div class="lesson" id="lesson-11">
+      <span class="lesson-badge badge-advanced">🔴 উন্নত</span>
+      <h1 class="lesson-title">Index ও Performance</h1>
+      <p class="lesson-desc">Index হলো বইয়ের সূচিপত্রের মতো — এটি ডেটা দ্রুত খুঁজে পেতে সাহায্য করে।</p>
+
+      <h2>Index তৈরি করো</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="cm">-- সাধারণ Index</span>
+<span class="kw">CREATE INDEX</span> idx_name <span class="kw">ON</span> <span class="tbl">students</span>(<span class="col">name</span>);
+
+<span class="cm">-- Unique Index</span>
+<span class="kw">CREATE UNIQUE INDEX</span> idx_roll <span class="kw">ON</span> <span class="tbl">students</span>(<span class="col">roll</span>);
+
+<span class="cm">-- একাধিক কলামে Index</span>
+<span class="kw">CREATE INDEX</span> idx_class_marks <span class="kw">ON</span> <span class="tbl">students</span>(<span class="col">class</span>, <span class="col">marks</span>);
+
+<span class="cm">-- Index দেখো</span>
+<span class="kw">SHOW INDEX FROM</span> <span class="tbl">students</span>;
+
+<span class="cm">-- Index মুছো</span>
+<span class="kw">DROP INDEX</span> idx_name <span class="kw">ON</span> <span class="tbl">students</span>;</pre>
+      </div>
+
+      <h2>EXPLAIN দিয়ে Query বিশ্লেষণ করো</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="cm">-- Query কীভাবে চলছে দেখো</span>
+<span class="kw">EXPLAIN SELECT</span> * <span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">WHERE</span> <span class="col">name</span> = <span class="str">'আরিফ হোসেন'</span>;</pre>
+      </div>
+
+      <div class="info-box">
+        <strong>📌 Performance টিপস:</strong><br>
+        ✅ WHERE, JOIN, ORDER BY তে ব্যবহৃত কলামে Index দাও<br>
+        ✅ SELECT * এর বদলে শুধু দরকারি কলাম ব্যবহার করো<br>
+        ✅ LIMIT ব্যবহার করো বড় ডেটাসেটে<br>
+        ✅ অপ্রয়োজনীয় Index এড়িয়ে চলো — এটি INSERT/UPDATE ধীর করে
+      </div>
+
+      <div class="lesson-nav">
+        <button class="btn btn-secondary" onclick="prevLesson(11)">← আগের পাঠ</button>
+        <button class="btn btn-primary" onclick="nextLesson(11)">পরের পাঠ →</button>
+      </div>
+    </div>
+
+    <!-- LESSON 12: VIEW & STORED PROC -->
+    <div class="lesson" id="lesson-12">
+      <span class="lesson-badge badge-advanced">🔴 উন্নত</span>
+      <h1 class="lesson-title">View ও Stored Procedure</h1>
+      <p class="lesson-desc">View হলো সংরক্ষিত Query। Stored Procedure হলো ডেটাবেসে সংরক্ষিত কোডের সমষ্টি।</p>
+
+      <h2>View তৈরি করো</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="cm">-- View তৈরি করো</span>
+<span class="kw">CREATE VIEW</span> <span class="tbl">top_students</span> <span class="kw">AS</span>
+<span class="kw">SELECT</span> <span class="col">name</span>, <span class="col">class</span>, <span class="col">marks</span>
+<span class="kw">FROM</span> <span class="tbl">students</span>
+<span class="kw">WHERE</span> <span class="col">marks</span> >= <span class="num">90</span>
+<span class="kw">ORDER BY</span> <span class="col">marks</span> <span class="kw">DESC</span>;
+
+<span class="cm">-- View ব্যবহার করো (টেবিলের মতো)</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">top_students</span>;
+
+<span class="cm">-- View মুছো</span>
+<span class="kw">DROP VIEW</span> <span class="tbl">top_students</span>;</pre>
+      </div>
+
+      <h2>Stored Procedure তৈরি করো</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="kw">DELIMITER</span> //
+
+<span class="kw">CREATE PROCEDURE</span> <span class="fn">GetStudentsByClass</span>(
+  <span class="kw">IN</span> p_class <span class="kw">VARCHAR</span>(<span class="num">20</span>)
+)
+<span class="kw">BEGIN</span>
+  <span class="kw">SELECT</span> <span class="col">name</span>, <span class="col">roll</span>, <span class="col">marks</span>
+  <span class="kw">FROM</span> <span class="tbl">students</span>
+  <span class="kw">WHERE</span> <span class="col">class</span> = p_class
+  <span class="kw">ORDER BY</span> <span class="col">marks</span> <span class="kw">DESC</span>;
+<span class="kw">END</span> //
+
+<span class="kw">DELIMITER</span> ;
+
+<span class="cm">-- Procedure চালাও</span>
+<span class="kw">CALL</span> <span class="fn">GetStudentsByClass</span>(<span class="str">'দশম'</span>);</pre>
+      </div>
+
+      <div class="info-box tip">
+        <strong>💡 View এর সুবিধা:</strong> জটিল Query বারবার লিখতে হয় না। নিরাপত্তার জন্য সরাসরি টেবিল না দেখিয়ে View দেওয়া যায়।
+      </div>
+
+      <div class="lesson-nav">
+        <button class="btn btn-secondary" onclick="prevLesson(12)">← আগের পাঠ</button>
+        <button class="btn btn-primary" onclick="nextLesson(12)">পরের পাঠ →</button>
+      </div>
+    </div>
+
+    <!-- LESSON 13: TRANSACTION & SECURITY -->
+    <div class="lesson" id="lesson-13">
+      <span class="lesson-badge badge-advanced">🔴 উন্নত</span>
+      <h1 class="lesson-title">Transaction ও Security</h1>
+      <p class="lesson-desc">Transaction নিশ্চিত করে যে একাধিক অপারেশন হয় সবগুলো সফল হবে, নয়তো কোনোটিই হবে না।</p>
+
+      <h2>Transaction ব্যবহার</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="cm">-- Transaction শুরু করো</span>
+<span class="kw">START TRANSACTION</span>;
+
+<span class="cm">-- অপারেশন করো</span>
+<span class="kw">UPDATE</span> <span class="tbl">accounts</span> <span class="kw">SET</span> <span class="col">balance</span> = <span class="col">balance</span> - <span class="num">1000</span>
+<span class="kw">WHERE</span> <span class="col">id</span> = <span class="num">1</span>;
+
+<span class="kw">UPDATE</span> <span class="tbl">accounts</span> <span class="kw">SET</span> <span class="col">balance</span> = <span class="col">balance</span> + <span class="num">1000</span>
+<span class="kw">WHERE</span> <span class="col">id</span> = <span class="num">2</span>;
+
+<span class="cm">-- সফল হলে সংরক্ষণ করো</span>
+<span class="kw">COMMIT</span>;
+
+<span class="cm">-- সমস্যা হলে বাতিল করো</span>
+<span class="kw">ROLLBACK</span>;</pre>
+      </div>
+
+      <h2>User ও Permission</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">কপি</button></div>
+        <pre><span class="cm">-- নতুন User তৈরি করো</span>
+<span class="kw">CREATE USER</span> <span class="str">'rahim'</span>@<span class="str">'localhost'</span>
+  <span class="kw">IDENTIFIED BY</span> <span class="str">'শক্তিশালী_পাসওয়ার্ড'</span>;
+
+<span class="cm">-- Permission দাও</span>
+<span class="kw">GRANT SELECT, INSERT, UPDATE ON</span>
+  school_db.* <span class="kw">TO</span> <span class="str">'rahim'</span>@<span class="str">'localhost'</span>;
+
+<span class="cm">-- সব Permission দাও (Admin)</span>
+<span class="kw">GRANT ALL PRIVILEGES ON</span> *.* <span class="kw">TO</span> <span class="str">'admin'</span>@<span class="str">'localhost'</span>;
+
+<span class="cm">-- Permission প্রয়োগ করো</span>
+<span class="kw">FLUSH PRIVILEGES</span>;
+
+<span class="cm">-- Permission সরাও</span>
+<span class="kw">REVOKE INSERT ON</span> school_db.* <span class="kw">FROM</span> <span class="str">'rahim'</span>@<span class="str">'localhost'</span>;
+
+<span class="cm">-- User মুছো</span>
+<span class="kw">DROP USER</span> <span class="str">'rahim'</span>@<span class="str">'localhost'</span>;</pre>
+      </div>
+
+      <div class="info-box">
+        <strong>🔐 ACID গুণাবলী:</strong><br>
+        <strong>A</strong>tomicity — সব হয় নয়তো কিছুই না<br>
+        <strong>C</strong>onsistency — ডেটা সর্বদা বৈধ থাকে<br>
+        <strong>I</strong>solation — Transaction পরস্পর থেকে আলাদা<br>
+        <strong>D</strong>urability — Commit হলে স্থায়ী
+      </div>
+
+      <div class="info-box warning">
+        <strong>🎉 অভিনন্দন!</strong> তুমি MySQL Basic থেকে Advanced পর্যন্ত সম্পন্ন করেছো! নিয়মিত অনুশীলন করো এবং বাস্তব প্রজেক্টে ব্যবহার করো।
+      </div>
+
+      <div class="lesson-nav">
+        <button class="btn btn-secondary" onclick="prevLesson(13)">← আগের পাঠ</button>
+        <button class="btn btn-primary" onclick="showLesson(0); alert('অভিনন্দন! সব পাঠ সম্পন্ন হয়েছে 🎉')">🏠 শুরুতে ফিরে যাও</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MOBILE BOTTOM NAV -->
+<div class="mobile-lesson-nav" id="mobileNav">
+  <button class="btn btn-secondary" id="prevBtn" onclick="prevLesson(current)">← আগের</button>
+  <button class="btn btn-primary" id="nextBtn" onclick="nextLesson(current)">পরের →</button>
+</div>
+
+<script>
+  const TOTAL = 14;
+  let completed = new Set();
+  let current = 0;
+
+  function toggleSidebar() {
+    const s = document.getElementById('sidebar');
+    const o = document.getElementById('overlay');
+    const h = document.getElementById('hamburger');
+    s.classList.toggle('open');
+    o.classList.toggle('visible');
+    h.classList.toggle('open');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('visible');
+    document.getElementById('hamburger').classList.remove('open');
+  }
+
+  function showLesson(idx) {
+    document.querySelectorAll('.lesson').forEach(l => l.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('lesson-' + idx).classList.add('active');
+    document.getElementById('nav-' + idx).classList.add('active');
+    current = idx;
+    completed.add(idx);
+    document.getElementById('nav-' + idx).classList.add('done');
+    updateProgress();
+    updateMobileNav();
+    // scroll to top
+    const c = document.querySelector('.content');
+    if (c) c.scrollTo(0, 0);
+    closeSidebar();
+    // reset quizzes
+    document.querySelectorAll('.quiz-opt').forEach(b => { b.classList.remove('correct','wrong'); b.disabled = false; });
+    document.querySelectorAll('.quiz-result').forEach(r => { r.style.display = 'none'; });
+  }
+
+  function nextLesson(idx) { if (idx < TOTAL - 1) showLesson(idx + 1); }
+  function prevLesson(idx) { if (idx > 0) showLesson(idx - 1); }
+
+  function updateProgress() {
+    const pct = (completed.size / TOTAL) * 100;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressText').textContent = completed.size + '/' + TOTAL;
+  }
+
+  function updateMobileNav() {
+    const prev = document.getElementById('prevBtn');
+    const next = document.getElementById('nextBtn');
+    if (prev) prev.style.opacity = current === 0 ? '0.3' : '1';
+    if (next) {
+      next.textContent = current === TOTAL - 1 ? '🏠 প্রথমে' : 'পরের →';
+      next.onclick = current === TOTAL - 1
+        ? () => showLesson(0)
+        : () => nextLesson(current);
+    }
+  }
+
+  function answer(btn, correct) {
+    const box = btn.closest('.quiz-box');
+    const opts = box.querySelectorAll('.quiz-opt');
+    const res = box.querySelector('.quiz-result');
+    opts.forEach(b => b.disabled = true);
+    if (correct) {
+      btn.classList.add('correct');
+      res.textContent = '✅ সঠিক উত্তর! চমৎকার!';
+      res.style.color = 'var(--green)';
+    } else {
+      btn.classList.add('wrong');
+      res.textContent = '❌ ভুল উত্তর। আবার পড়ো!';
+      res.style.color = 'var(--accent2)';
+      opts.forEach(b => { if (b.onclick.toString().includes('true')) b.classList.add('correct'); });
+    }
+    res.style.display = 'block';
+  }
+
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = '✅ কপি হয়েছে';
+      setTimeout(() => btn.textContent = 'কপি', 2000);
+    });
+  }
+
+  // Init
+  updateProgress();
+  updateMobileNav();
+</script>
+</body>
+</html>
