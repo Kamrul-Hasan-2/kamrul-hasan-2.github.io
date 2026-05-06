@@ -1,0 +1,1755 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PHP বাংলা — বেসিক থেকে অ্যাডভান্স</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07080d;
+  --surface:#0e1018;
+  --surface2:#151821;
+  --surface3:#1c2030;
+  --border:#1f2536;
+  --border2:#2a3348;
+  --text:#dde2f0;
+  --muted:#5c6a8a;
+  --muted2:#8896b3;
+  --accent:#6c63ff;
+  --accent-glow:rgba(108,99,255,0.18);
+  --green:#10d98a;
+  --amber:#f5a623;
+  --red:#ff5c5c;
+  --blue:#4da6ff;
+  --pink:#ff6eb4;
+  --cyan:#00d4ff;
+  --teal:#00b8a9;
+  --radius:14px;
+  --radius-sm:8px;
+  --sidebar:280px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Hind Siliguri',sans-serif;background:var(--bg);color:var(--text);line-height:1.75;overflow-x:hidden}
+
+/* ============ SIDEBAR ============ */
+.sidebar{
+  position:fixed;top:0;left:0;width:var(--sidebar);height:100vh;
+  background:var(--surface);border-right:1px solid var(--border);
+  overflow-y:auto;z-index:200;display:flex;flex-direction:column;
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+}
+.sidebar::-webkit-scrollbar{width:4px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+.sidebar-logo{
+  padding:1.5rem 1.25rem 1rem;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.logo-icon{
+  width:36px;height:36px;border-radius:10px;
+  background:linear-gradient(135deg,var(--accent),#a855f7);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:#fff;
+  flex-shrink:0;
+}
+.logo-text{font-family:'Sora',sans-serif;font-size:15px;font-weight:700;color:#fff}
+.logo-sub{font-size:10px;color:var(--muted);display:block;margin-top:-2px}
+
+.nav-phase{margin-bottom:.25rem}
+.phase-btn{
+  width:100%;display:flex;align-items:center;gap:10px;
+  padding:.65rem 1.25rem;border:none;background:transparent;
+  cursor:pointer;text-align:left;transition:background .2s;
+  border-left:3px solid transparent;
+}
+.phase-btn:hover{background:var(--surface2)}
+.phase-btn.active{background:var(--surface2);border-left-color:var(--accent)}
+.phase-dot{
+  width:8px;height:8px;border-radius:50%;flex-shrink:0;
+  box-shadow:0 0 6px currentColor;
+}
+.phase-label{font-size:12px;font-weight:600;color:var(--muted2);letter-spacing:.04em;font-family:'JetBrains Mono',monospace}
+.phase-btn.active .phase-label{color:#fff}
+
+.lesson-list{display:none;padding-left:0}
+.lesson-list.open{display:block}
+.lesson-item{
+  display:block;padding:.45rem 1.25rem .45rem 2.5rem;
+  font-size:13px;color:var(--muted2);cursor:pointer;
+  transition:color .15s,background .15s;border:none;background:none;
+  width:100%;text-align:left;
+}
+.lesson-item:hover{color:var(--text);background:rgba(255,255,255,0.02)}
+.lesson-item.active{color:var(--accent);font-weight:500}
+.lesson-item.done::before{content:'✓ ';color:var(--green);font-size:11px}
+
+.progress-bar-wrap{padding:.75rem 1.25rem;border-top:1px solid var(--border);margin-top:auto}
+.progress-label{font-size:11px;color:var(--muted);margin-bottom:5px;display:flex;justify-content:space-between}
+.progress-track{height:4px;background:var(--border2);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--green));border-radius:4px;transition:width .4s ease;width:0%}
+
+/* ============ TOPBAR (mobile) ============ */
+.topbar{
+  display:none;position:fixed;top:0;left:0;right:0;
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:.75rem 1rem;z-index:300;align-items:center;gap:12px;
+}
+.hamburger{
+  background:none;border:1px solid var(--border2);border-radius:6px;
+  color:var(--text);padding:6px 8px;cursor:pointer;font-size:18px;flex-shrink:0;
+}
+.topbar-title{font-family:'Sora',sans-serif;font-weight:700;color:#fff;font-size:15px}
+
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:150}
+
+/* ============ MAIN CONTENT ============ */
+.main{margin-left:var(--sidebar);min-height:100vh;display:flex;flex-direction:column}
+.content{flex:1;padding:2.5rem 2rem;max-width:860px}
+
+/* ============ LESSON HEADER ============ */
+.lesson-hero{margin-bottom:2rem}
+.lesson-phase-tag{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  padding:4px 12px;border-radius:20px;border:1px solid;
+  margin-bottom:.85rem;
+}
+.lesson-title{
+  font-family:'Sora',sans-serif;
+  font-size:clamp(1.5rem,4vw,2.2rem);
+  font-weight:800;color:#fff;
+  margin-bottom:.6rem;line-height:1.25;
+}
+.lesson-desc{font-size:15px;color:var(--muted2);max-width:620px;line-height:1.8}
+
+/* ============ CONCEPT SECTION ============ */
+.concept-block{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:1.5rem;margin-bottom:1.5rem;
+}
+.concept-block h3{
+  font-family:'Sora',sans-serif;font-size:1.05rem;font-weight:700;
+  color:#fff;margin-bottom:.6rem;display:flex;align-items:center;gap:8px;
+}
+.concept-block p,.concept-block ul{font-size:14.5px;color:var(--muted2);line-height:1.85}
+.concept-block ul{padding-left:1.2rem;margin-top:.4rem}
+.concept-block ul li{margin-bottom:.3rem}
+.concept-block ul li strong{color:var(--text)}
+.hl{color:var(--accent2,#a78bfa);font-weight:500}
+.hl-g{color:var(--green)}
+.hl-a{color:var(--amber)}
+.hl-b{color:var(--blue)}
+
+/* ============ CODE BLOCK ============ */
+.code-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;margin-bottom:1.5rem;
+}
+.code-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.6rem 1rem;background:var(--surface2);border-bottom:1px solid var(--border);
+}
+.code-dots{display:flex;gap:5px}
+.cd{width:11px;height:11px;border-radius:50%}
+.cd-r{background:#ff5f57}.cd-y{background:#febc2e}.cd-g{background:#28c840}
+.code-tag{
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  color:var(--muted);letter-spacing:.06em;
+}
+.code-desc{
+  padding:.6rem 1rem;background:rgba(108,99,255,0.05);
+  border-bottom:1px solid var(--border);
+  font-size:13px;color:var(--muted2);
+}
+pre.php-code{
+  padding:1.25rem;overflow-x:auto;font-family:'JetBrains Mono',monospace;
+  font-size:13px;line-height:2;background:#060810;
+}
+pre.php-code::-webkit-scrollbar{height:4px}
+pre.php-code::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+.kw{color:#c084fc}
+.fn{color:#67e8f9}
+.str{color:#86efac}
+.num{color:#fb923c}
+.cmt{color:#374151;font-style:italic}
+.var{color:#fde68a}
+.op{color:#f472b6}
+.cls{color:#38bdf8}
+
+/* ============ OUTPUT BOX ============ */
+.output-box{
+  background:#020409;border:1px solid var(--border);
+  border-top:none;padding:1rem 1.25rem;
+  font-family:'JetBrains Mono',monospace;font-size:13px;
+  color:var(--green);line-height:1.9;
+}
+.output-label{font-size:10px;color:var(--muted);letter-spacing:.06em;margin-bottom:.4rem;display:block}
+
+/* ============ INFO BOXES ============ */
+.info-box{
+  border-radius:var(--radius-sm);padding:1rem 1.15rem;
+  font-size:13.5px;line-height:1.8;margin-bottom:1rem;
+  border-left:3px solid;
+}
+.info-blue{background:rgba(77,166,255,0.06);border-color:var(--blue);color:#93c5fd}
+.info-green{background:rgba(16,217,138,0.06);border-color:var(--green);color:#6ee7b7}
+.info-amber{background:rgba(245,166,35,0.06);border-color:var(--amber);color:#fcd34d}
+.info-red{background:rgba(255,92,92,0.06);border-color:var(--red);color:#fca5a5}
+.info-box strong{color:#fff;font-weight:600}
+
+/* ============ TABLE ============ */
+.data-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:1.5rem}
+.data-table th{
+  background:var(--surface2);color:var(--muted2);
+  font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.07em;
+  padding:10px 14px;text-align:left;border:1px solid var(--border);
+}
+.data-table td{
+  padding:9px 14px;border:1px solid var(--border);
+  color:var(--text);vertical-align:top;
+}
+.data-table tr:nth-child(even) td{background:var(--surface)}
+.data-table td code{
+  font-family:'JetBrains Mono',monospace;font-size:12px;
+  color:#c084fc;background:rgba(192,132,252,0.08);
+  padding:1px 6px;border-radius:4px;
+}
+
+/* ============ NAV BUTTONS ============ */
+.lesson-nav{
+  display:flex;gap:12px;margin-top:2.5rem;padding-top:1.5rem;
+  border-top:1px solid var(--border);flex-wrap:wrap;
+}
+.nav-btn{
+  flex:1;min-width:140px;padding:.7rem 1.2rem;border-radius:var(--radius-sm);
+  border:1px solid var(--border2);background:var(--surface);
+  color:var(--text);font-family:'Hind Siliguri',sans-serif;font-size:14px;
+  cursor:pointer;transition:all .2s;text-align:center;
+}
+.nav-btn:hover{background:var(--surface2);border-color:var(--accent)}
+.nav-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.nav-btn.primary:hover{background:#5a52e0}
+.nav-btn:disabled{opacity:.35;cursor:not-allowed}
+
+/* ============ QUIZ ============ */
+.quiz-wrap{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:1.5rem;margin-bottom:1.5rem;
+}
+.quiz-q{font-size:15px;font-weight:600;color:#fff;margin-bottom:1rem}
+.quiz-options{display:flex;flex-direction:column;gap:8px}
+.quiz-opt{
+  padding:.65rem 1rem;border:1px solid var(--border2);
+  border-radius:var(--radius-sm);background:var(--surface2);
+  color:var(--muted2);font-size:13.5px;cursor:pointer;
+  transition:all .2s;display:flex;align-items:center;gap:10px;
+}
+.quiz-opt:hover{border-color:var(--accent);color:var(--text)}
+.quiz-opt.correct{border-color:var(--green);background:rgba(16,217,138,0.08);color:var(--green)}
+.quiz-opt.wrong{border-color:var(--red);background:rgba(255,92,92,0.08);color:var(--red)}
+.quiz-feedback{margin-top:.75rem;font-size:13.5px;padding:.6rem 1rem;border-radius:var(--radius-sm)}
+
+/* ============ MARK DONE ============ */
+.done-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:.55rem 1.1rem;border-radius:var(--radius-sm);
+  border:1px solid var(--green);background:rgba(16,217,138,0.08);
+  color:var(--green);font-size:13.5px;cursor:pointer;transition:all .2s;
+  font-family:'Hind Siliguri',sans-serif;margin-bottom:1.5rem;
+}
+.done-btn:hover{background:rgba(16,217,138,0.15)}
+.done-btn.marked{background:rgba(16,217,138,0.2);font-weight:600}
+
+/* ============ HERO / WELCOME ============ */
+.welcome-screen{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:80vh;text-align:center;padding:2rem;
+}
+.welcome-glow{
+  width:120px;height:120px;border-radius:28px;
+  background:linear-gradient(135deg,var(--accent),#a855f7,var(--cyan));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:44px;font-weight:700;color:#fff;
+  margin:0 auto 1.5rem;box-shadow:0 0 60px rgba(108,99,255,0.3);
+}
+.welcome-screen h1{
+  font-family:'Sora',sans-serif;font-size:clamp(2rem,6vw,3.2rem);
+  font-weight:800;color:#fff;margin-bottom:.75rem;
+}
+.welcome-screen h1 span{
+  background:linear-gradient(90deg,var(--accent),var(--cyan));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.welcome-screen p{font-size:16px;color:var(--muted2);max-width:500px;margin:0 auto 2rem;line-height:1.8}
+.start-btn{
+  padding:.85rem 2rem;background:var(--accent);color:#fff;
+  border:none;border-radius:var(--radius-sm);font-family:'Sora',sans-serif;
+  font-size:16px;font-weight:700;cursor:pointer;transition:all .2s;
+  box-shadow:0 0 30px rgba(108,99,255,0.3);
+}
+.start-btn:hover{background:#5a52e0;transform:translateY(-1px)}
+.stats-row{display:flex;gap:2rem;justify-content:center;margin-top:2.5rem;flex-wrap:wrap}
+.stat-item{text-align:center}
+.stat-num{font-family:'Sora',sans-serif;font-size:1.8rem;font-weight:800;color:#fff}
+.stat-lbl{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* ============ PHASE DIVIDER ============ */
+.phase-divider{
+  display:flex;align-items:center;gap:12px;
+  margin:2rem 0 1.25rem;
+}
+.phase-divider h2{
+  font-family:'Sora',sans-serif;font-size:1.1rem;font-weight:700;
+  color:#fff;white-space:nowrap;
+}
+.divider-line{flex:1;height:1px;background:var(--border)}
+
+/* ============ RESPONSIVE ============ */
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.mobile-open{transform:translateX(0)}
+  .topbar{display:flex}
+  .main{margin-left:0;padding-top:56px}
+  .content{padding:1.5rem 1rem}
+  .overlay.active{display:block}
+  .welcome-screen{min-height:60vh}
+}
+@media(max-width:480px){
+  pre.php-code{font-size:11.5px}
+  .lesson-nav{flex-direction:column}
+  .nav-btn{min-width:unset}
+}
+
+/* ============ ANIMATIONS ============ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.lesson-content{animation:fadeUp .35s ease}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(108,99,255,0.4)}50%{box-shadow:0 0 0 8px rgba(108,99,255,0)}}
+
+/* scrollbar */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:6px}
+</style>
+</head>
+<body>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- TOPBAR (mobile) -->
+<div class="topbar" id="topbar">
+  <button class="hamburger" onclick="toggleSidebar()">☰</button>
+  <span class="topbar-title">PHP বাংলা কোর্স</span>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">&lt;?</div>
+    <div>
+      <div class="logo-text">PHPবাংলা</div>
+      <span class="logo-sub">বেসিক থেকে অ্যাডভান্স</span>
+    </div>
+  </div>
+  <div id="nav-container"></div>
+  <div class="progress-bar-wrap">
+    <div class="progress-label">
+      <span>অগ্রগতি</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="content" id="content">
+    <!-- Welcome screen shown by default -->
+    <div class="welcome-screen" id="welcome">
+      <div class="welcome-glow">&lt;?</div>
+      <h1>PHP শিখুন <span>বাংলায়</span></h1>
+      <p>বেসিক থেকে অ্যাডভান্স পর্যন্ত সম্পূর্ণ PHP কোর্স — বাংলা ভাষায়, বাস্তব উদাহরণ সহ।</p>
+      <button class="start-btn" onclick="loadLesson(0,0)">শুরু করুন →</button>
+      <div class="stats-row">
+        <div class="stat-item"><div class="stat-num">৬</div><div class="stat-lbl">ধাপ</div></div>
+        <div class="stat-item"><div class="stat-num" id="total-lessons-stat">০</div><div class="stat-lbl">লেসন</div></div>
+        <div class="stat-item"><div class="stat-num">১০০%</div><div class="stat-lbl">বাংলায়</div></div>
+      </div>
+    </div>
+    <div id="lesson-area" style="display:none"></div>
+  </div>
+</main>
+
+<script>
+// ============================================================
+// COURSE DATA
+// ============================================================
+const PHASES = [
+  {
+    id:'p1', color:'#6c63ff', name:'ধাপ ১ — বেসিক',
+    lessons:[
+      {
+        title:'PHP কী এবং কিভাবে কাজ করে',
+        tag:'PHP পরিচিতি',
+        desc:'PHP হলো একটি server-side scripting ভাষা যা ওয়েব পেজকে dynamic করে তোলে।',
+        content:`
+<div class="concept-block">
+<h3>🌐 PHP কী?</h3>
+<p><span class="hl">PHP (Hypertext Preprocessor)</span> হলো একটি <strong>server-side scripting language</strong>। এর মানে হলো PHP কোড সার্ভারে চলে, তারপর HTML হিসেবে ব্রাউজারে পাঠায়।</p>
+<ul style="margin-top:.75rem">
+<li>PHP ফাইলের এক্সটেনশন: <strong>.php</strong></li>
+<li>PHP কোড লেখা হয় <span class="hl">&lt;?php ... ?&gt;</span> ট্যাগের ভেতরে</li>
+<li>সার্ভার PHP কোড execute করে, ব্রাউজার শুধু output দেখে</li>
+<li>MySQL ডেটাবেসের সাথে সবচেয়ে ভালো কাজ করে</li>
+</ul>
+</div>
+
+<div class="concept-block">
+<h3>⚙️ PHP কিভাবে কাজ করে?</h3>
+<p>ব্যবহারকারী URL টাইপ করে → সার্ভার PHP ফাইল পায় → PHP execute হয় → HTML output তৈরি → ব্রাউজারে পাঠায়।</p>
+</div>
+
+<div class="code-card">
+<div class="code-header">
+  <div class="code-dots"><span class="cd cd-r"></span><span class="cd cd-y"></span><span class="cd cd-g"></span></div>
+  <span class="code-tag">hello.php — প্রথম PHP প্রোগ্রাম</span>
+</div>
+<div class="code-desc">echo ব্যবহার করে স্ক্রিনে টেক্সট দেখানো হচ্ছে</div>
+<pre class="php-code"><span class="kw">&lt;?php</span>
+  <span class="cmt">// এটা একটা single-line comment</span>
+  <span class="kw">echo</span> <span class="str">"হ্যালো বাংলাদেশ!"</span><span class="op">;</span>
+
+  <span class="cmt">/* এটা multi-line comment */</span>
+  <span class="kw">print</span> <span class="str">"PHP দিয়ে ওয়েব বানাই"</span><span class="op">;</span>
+
+  <span class="cmt">// HTML ও আউটপুট করা যায়</span>
+  <span class="kw">echo</span> <span class="str">"&lt;h1&gt;স্বাগতম!&lt;/h1&gt;"</span><span class="op">;</span>
+<span class="kw">?&gt;</span></pre>
+</div>
+<div class="output-box"><span class="output-label">▶ OUTPUT</span>হ্যালো বাংলাদেশ!PHP দিয়ে ওয়েব বানাই
+<h1 style="font-size:14px;color:#fff">স্বাগতম!</h1></div>
+
+<div class="info-box info-blue">
+<strong>💡 echo vs print:</strong> দুটোই টেক্সট আউটপুট করে। <code>echo</code> একটু দ্রুত এবং multiple value নিতে পারে। <code>print</code> সবসময় 1 রিটার্ন করে।
+</div>
+
+<div class="quiz-wrap">
+<div class="quiz-q">❓ PHP ফাইলের সঠিক শুরু ট্যাগ কোনটি?</div>
+<div class="quiz-options">
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">🔵 &lt;php&gt;</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,true)">🟢 &lt;?php</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">🔴 &lt;script type="php"&gt;</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">🟡 &lt;?= php</button>
+</div>
+</div>`
+      },
+      {
+        title:'ভেরিয়েবল ও ডেটা টাইপ',
+        tag:'Variables',
+        desc:'PHP-তে ভেরিয়েবল $ চিহ্ন দিয়ে শুরু হয় এবং ৮টি ডেটা টাইপ আছে।',
+        content:`
+<div class="concept-block">
+<h3>📦 ভেরিয়েবল (Variable)</h3>
+<p>ভেরিয়েবল হলো ডেটা রাখার পাত্র। PHP-তে প্রতিটি ভেরিয়েবল <span class="hl">$</span> দিয়ে শুরু হয়।</p>
+<ul style="margin-top:.5rem">
+<li>ভেরিয়েবলের নাম letter বা _ দিয়ে শুরু হতে হবে</li>
+<li>PHP case-sensitive: <code>$name</code> আর <code>$Name</code> আলাদা</li>
+<li>টাইপ আগে বলতে হয় না — PHP নিজে বোঝে</li>
+</ul>
+</div>
+
+<div class="code-card">
+<div class="code-header">
+  <div class="code-dots"><span class="cd cd-r"></span><span class="cd cd-y"></span><span class="cd cd-g"></span></div>
+  <span class="code-tag">variables.php</span>
+</div>
+<pre class="php-code"><span class="kw">&lt;?php</span>
+<span class="cmt">// String — টেক্সট</span>
+<span class="var">$name</span> <span class="op">=</span> <span class="str">"রাহেলা"</span><span class="op">;</span>
+
+<span class="cmt">// Integer — পূর্ণসংখ্যা</span>
+<span class="var">$age</span> <span class="op">=</span> <span class="num">22</span><span class="op">;</span>
+
+<span class="cmt">// Float — দশমিক সংখ্যা</span>
+<span class="var">$height</span> <span class="op">=</span> <span class="num">5.4</span><span class="op">;</span>
+
+<span class="cmt">// Boolean — সত্য/মিথ্যা</span>
+<span class="var">$isStudent</span> <span class="op">=</span> <span class="kw">true</span><span class="op">;</span>
+
+<span class="cmt">// NULL — কোনো মান নেই</span>
+<span class="var">$address</span> <span class="op">=</span> <span class="kw">null</span><span class="op">;</span>
+
+<span class="cmt">// আউটপুট করা</span>
+<span class="kw">echo</span> <span class="str">"নাম: "</span> <span class="op">.</span> <span class="var">$name</span> <span class="op">.</span> <span class="str">"&lt;br&gt;"</span><span class="op">;</span>
+<span class="kw">echo</span> <span class="str">"বয়স: <span class="var">$age</span> বছর"</span><span class="op">;</span>
+
+<span class="cmt">// gettype() দিয়ে টাইপ জানা</span>
+<span class="kw">echo</span> <span class="fn">gettype</span><span class="op">(</span><span class="var">$name</span><span class="op">)</span><span class="op">;</span>  <span class="cmt">// string</span>
+<span class="kw">echo</span> <span class="fn">gettype</span><span class="op">(</span><span class="var">$age</span><span class="op">)</span><span class="op">;</span>   <span class="cmt">// integer</span>
+<span class="kw">?&gt;</span></pre>
+</div>
+<div class="output-box"><span class="output-label">▶ OUTPUT</span>নাম: রাহেলা<br>বয়স: 22 বছর<br>string<br>integer</div>
+
+<table class="data-table">
+<tr><th>ডেটা টাইপ</th><th>বাংলা অর্থ</th><th>উদাহরণ</th></tr>
+<tr><td>String</td><td>টেক্সট/লেখা</td><td><code>"বাংলাদেশ"</code></td></tr>
+<tr><td>Integer</td><td>পূর্ণসংখ্যা</td><td><code>42</code></td></tr>
+<tr><td>Float</td><td>দশমিক সংখ্যা</td><td><code>3.14</code></td></tr>
+<tr><td>Boolean</td><td>সত্য/মিথ্যা</td><td><code>true, false</code></td></tr>
+<tr><td>Array</td><td>তালিকা</td><td><code>[1, 2, 3]</code></td></tr>
+<tr><td>Object</td><td>অবজেক্ট</td><td>class থেকে তৈরি</td></tr>
+<tr><td>NULL</td><td>কোনো মান নেই</td><td><code>null</code></td></tr>
+<tr><td>Resource</td><td>বাহ্যিক রিসোর্স</td><td>file handle</td></tr>
+</table>
+
+<div class="quiz-wrap">
+<div class="quiz-q">❓ PHP-তে ভেরিয়েবল কোন চিহ্ন দিয়ে শুরু হয়?</div>
+<div class="quiz-options">
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">@ চিহ্ন</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)"># চিহ্ন</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,true)">$ চিহ্ন</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">% চিহ্ন</button>
+</div>
+</div>`
+      },
+      {
+        title:'অপারেটর সমূহ',
+        tag:'Operators',
+        desc:'PHP-তে Arithmetic, Comparison, Logical সহ বিভিন্ন ধরনের অপারেটর আছে।',
+        content:`
+<div class="concept-block">
+<h3>🧮 অপারেটর (Operators)</h3>
+<p>অপারেটর হলো বিশেষ চিহ্ন যা ভেরিয়েবল বা মানের উপর অপারেশন চালায়।</p>
+</div>
+
+<div class="code-card">
+<div class="code-header">
+  <div class="code-dots"><span class="cd cd-r"></span><span class="cd cd-y"></span><span class="cd cd-g"></span></div>
+  <span class="code-tag">operators.php</span>
+</div>
+<pre class="php-code"><span class="kw">&lt;?php</span>
+<span class="var">$a</span> <span class="op">=</span> <span class="num">20</span><span class="op">;</span>  <span class="var">$b</span> <span class="op">=</span> <span class="num">6</span><span class="op">;</span>
+
+<span class="cmt">// === Arithmetic (গাণিতিক) ===</span>
+<span class="kw">echo</span> <span class="var">$a</span> <span class="op">+</span> <span class="var">$b</span><span class="op">;</span>   <span class="cmt">// 26 (যোগ)</span>
+<span class="kw">echo</span> <span class="var">$a</span> <span class="op">-</span> <span class="var">$b</span><span class="op">;</span>   <span class="cmt">// 14 (বিয়োগ)</span>
+<span class="kw">echo</span> <span class="var">$a</span> <span class="op">*</span> <span class="var">$b</span><span class="op">;</span>   <span class="cmt">// 120 (গুণ)</span>
+<span class="kw">echo</span> <span class="var">$a</span> <span class="op">/</span> <span class="var">$b</span><span class="op">;</span>   <span class="cmt">// 3.33 (ভাগ)</span>
+<span class="kw">echo</span> <span class="var">$a</span> <span class="op">%</span> <span class="var">$b</span><span class="op">;</span>   <span class="cmt">// 2 (ভাগশেষ)</span>
+<span class="kw">echo</span> <span class="var">$a</span> <span class="op">**</span> <span class="num">2</span><span class="op">;</span>  <span class="cmt">// 400 (a^2)</span>
+
+<span class="cmt">// === Comparison (তুলনামূলক) ===</span>
+<span class="var">$x</span> <span class="op">=</span> <span class="num">10</span><span class="op">;</span>
+<span class="kw">var_dump</span><span class="op">(</span><span class="var">$x</span> <span class="op">==</span> <span class="str">"10"</span><span class="op">);</span>   <span class="cmt">// true (মান সমান)</span>
+<span class="kw">var_dump</span><span class="op">(</span><span class="var">$x</span> <span class="op">===</span> <span class="str">"10"</span><span class="op">);</span>  <span class="cmt">// false (টাইপ আলাদা)</span>
+<span class="kw">var_dump</span><span class="op">(</span><span class="var">$x</span> <span class="op">!=</span> <span class="num">5</span><span class="op">);</span>     <span class="cmt">// true</span>
+<span class="kw">var_dump</span><span class="op">(</span><span class="var">$x</span> <span class="op">&gt;</span> <span class="num">5</span><span class="op">);</span>      <span class="cmt">// true</span>
+
+<span class="cmt">// === Logical (যৌক্তিক) ===</span>
+<span class="var">$isAdmin</span> <span class="op">=</span> <span class="kw">true</span><span class="op">;</span>
+<span class="var">$isActive</span> <span class="op">=</span> <span class="kw">true</span><span class="op">;</span>
+<span class="kw">var_dump</span><span class="op">(</span><span class="var">$isAdmin</span> <span class="op">&amp;&amp;</span> <span class="var">$isActive</span><span class="op">);</span>  <span class="cmt">// true (AND)</span>
+<span class="kw">var_dump</span><span class="op">(</span><span class="var">$isAdmin</span> <span class="op">||</span> <span class="kw">false</span><span class="op">);</span>     <span class="cmt">// true (OR)</span>
+<span class="kw">var_dump</span><span class="op">(!</span><span class="var">$isAdmin</span><span class="op">);</span>              <span class="cmt">// false (NOT)</span>
+
+<span class="cmt">// === String concatenation ===</span>
+<span class="var">$full</span> <span class="op">=</span> <span class="str">"রাহেলা"</span> <span class="op">.</span> <span class="str">" আক্তার"</span><span class="op">;</span>
+<span class="kw">echo</span> <span class="var">$full</span><span class="op">;</span>  <span class="cmt">// রাহেলা আক্তার</span>
+<span class="kw">?&gt;</span></pre>
+</div>
+<div class="output-box"><span class="output-label">▶ OUTPUT</span>26 | 14 | 120 | 3.33 | 2 | 400<br>bool(true) | bool(false) | bool(true) | bool(true)<br>bool(true) | bool(true) | bool(false)<br>রাহেলা আক্তার</div>
+
+<div class="info-box info-amber">
+<strong>⚠️ == vs ===:</strong> <code>==</code> শুধু মান তুলনা করে, <code>===</code> মান AND টাইপ দুটোই তুলনা করে। Professional code-এ সবসময় <code>===</code> ব্যবহার করো।
+</div>
+
+<div class="quiz-wrap">
+<div class="quiz-q">❓ <code>10 % 3</code> এর মান কত?</div>
+<div class="quiz-options">
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">3</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,true)">1</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">0</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">30</button>
+</div>
+</div>`
+      },
+      {
+        title:'কনস্ট্যান্ট — define() ও const',
+        tag:'Constants',
+        desc:'কনস্ট্যান্ট হলো এমন মান যা একবার সেট হলে পরিবর্তন হয় না।',
+        content:`
+<div class="concept-block">
+<h3>🔒 কনস্ট্যান্ট (Constant)</h3>
+<p>কনস্ট্যান্ট হলো এমন ভেরিয়েবল যার মান <span class="hl">পরিবর্তন করা যায় না</span>। নাম সাধারণত <strong>UPPERCASE</strong> এ লেখা হয়।</p>
+</div>
+
+<div class="code-card">
+<div class="code-header">
+  <div class="code-dots"><span class="cd cd-r"></span><span class="cd cd-y"></span><span class="cd cd-g"></span></div>
+  <span class="code-tag">constants.php</span>
+</div>
+<pre class="php-code"><span class="kw">&lt;?php</span>
+<span class="cmt">// define() দিয়ে — যেকোনো জায়গায় ব্যবহার করা যায়</span>
+<span class="fn">define</span><span class="op">(</span><span class="str">"SITE_NAME"</span><span class="op">,</span> <span class="str">"PHPবাংলা"</span><span class="op">);</span>
+<span class="fn">define</span><span class="op">(</span><span class="str">"VERSION"</span><span class="op">,</span> <span class="num">1.0</span><span class="op">);</span>
+<span class="fn">define</span><span class="op">(</span><span class="str">"PI"</span><span class="op">,</span> <span class="num">3.14159</span><span class="op">);</span>
+
+<span class="kw">echo</span> <span class="cls">SITE_NAME</span><span class="op">;</span>  <span class="cmt">// PHPবাংলা ($ ছাড়া)</span>
+
+<span class="cmt">// const keyword — class এর ভেতরেও ব্যবহার হয়</span>
+<span class="kw">const</span> <span class="cls">MAX_USERS</span> <span class="op">=</span> <span class="num">100</span><span class="op">;</span>
+<span class="kw">const</span> <span class="cls">DB_HOST</span> <span class="op">=</span> <span class="str">"localhost"</span><span class="op">;</span>
+
+<span class="cmt">// PHP built-in constant</span>
+<span class="kw">echo</span> <span class="cls">PHP_VERSION</span><span class="op">;</span>   <span class="cmt">// 8.x.x</span>
+<span class="kw">echo</span> <span class="cls">PHP_OS</span><span class="op">;</span>        <span class="cmt">// Linux / Windows</span>
+<span class="kw">echo</span> <span class="cls">PHP_EOL</span><span class="op">;</span>       <span class="cmt">// line break</span>
+<span class="kw">echo</span> <span class="cls">__FILE__</span><span class="op">;</span>      <span class="cmt">// বর্তমান ফাইলের path</span>
+<span class="kw">echo</span> <span class="cls">__LINE__</span><span class="op">;</span>      <span class="cmt">// বর্তমান লাইন নম্বর</span>
+<span class="kw">?&gt;</span></pre>
+</div>
+<div class="output-box"><span class="output-label">▶ OUTPUT</span>PHPবাংলা<br>8.2.0<br>Linux</div>
+
+<div class="info-box info-green">
+<strong>✅ কখন constant ব্যবহার করবে?</strong> Database credentials, site URL, tax rate, API key — এরকম মান যা পুরো প্রজেক্টে একই থাকে সেগুলো constant রাখো।
+</div>
+
+<div class="quiz-wrap">
+<div class="quiz-q">❓ Constant এর মান কিভাবে access করা হয়?</div>
+<div class="quiz-options">
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">$CONSTANT_NAME</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,true)">CONSTANT_NAME ($ ছাড়া)</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">&CONSTANT_NAME</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">@CONSTANT_NAME</button>
+</div>
+</div>`
+      }
+    ]
+  },
+  {
+    id:'p2', color:'#10d98a', name:'ধাপ ২ — কন্ট্রোল ফ্লো',
+    lessons:[
+      {
+        title:'if / else / elseif শর্তমূলক বিবৃতি',
+        tag:'Conditionals',
+        desc:'শর্ত অনুযায়ী প্রোগ্রামের ভিন্ন অংশ চালানো হয়।',
+        content:`
+<div class="concept-block">
+<h3>🔀 if / else / elseif</h3>
+<p>শর্ত পরীক্ষা করে সিদ্ধান্ত নেওয়ার জন্য ব্যবহার হয়। যদি শর্ত <span class="hl-g">true</span> হয় তাহলে if ব্লক, নইলে else ব্লক চলে।</p>
+</div>
+
+<div class="code-card">
+<div class="code-header">
+  <div class="code-dots"><span class="cd cd-r"></span><span class="cd cd-y"></span><span class="cd cd-g"></span></div>
+  <span class="code-tag">conditionals.php — সংখ্যা যাচাই</span>
+</div>
+<pre class="php-code"><span class="kw">&lt;?php</span>
+<span class="var">$marks</span> <span class="op">=</span> <span class="num">75</span><span class="op">;</span>
+
+<span class="kw">if</span> <span class="op">(</span><span class="var">$marks</span> <span class="op">&gt;=</span> <span class="num">80</span><span class="op">) {</span>
+    <span class="kw">echo</span> <span class="str">"গ্রেড: A+"</span><span class="op">;</span>
+<span class="op">}</span> <span class="kw">elseif</span> <span class="op">(</span><span class="var">$marks</span> <span class="op">&gt;=</span> <span class="num">70</span><span class="op">) {</span>
+    <span class="kw">echo</span> <span class="str">"গ্রেড: A"</span><span class="op">;</span>   <span class="cmt">// ✅ এটা চলবে</span>
+<span class="op">}</span> <span class="kw">elseif</span> <span class="op">(</span><span class="var">$marks</span> <span class="op">&gt;=</span> <span class="num">60</span><span class="op">) {</span>
+    <span class="kw">echo</span> <span class="str">"গ্রেড: B"</span><span class="op">;</span>
+<span class="op">}</span> <span class="kw">elseif</span> <span class="op">(</span><span class="var">$marks</span> <span class="op">&gt;=</span> <span class="num">33</span><span class="op">) {</span>
+    <span class="kw">echo</span> <span class="str">"গ্রেড: C — পাস"</span><span class="op">;</span>
+<span class="op">}</span> <span class="kw">else</span> <span class="op">{</span>
+    <span class="kw">echo</span> <span class="str">"গ্রেড: F — ফেল"</span><span class="op">;</span>
+<span class="op">}</span>
+
+<span class="cmt">// Ternary Operator — সংক্ষিপ্ত if-else</span>
+<span class="var">$age</span> <span class="op">=</span> <span class="num">20</span><span class="op">;</span>
+<span class="var">$status</span> <span class="op">=</span> <span class="op">(</span><span class="var">$age</span> <span class="op">&gt;=</span> <span class="num">18</span><span class="op">)</span> <span class="op">?</span> <span class="str">"প্রাপ্তবয়স্ক"</span> <span class="op">:</span> <span class="str">"অপ্রাপ্তবয়স্ক"</span><span class="op">;</span>
+<span class="kw">echo</span> <span class="var">$status</span><span class="op">;</span>  <span class="cmt">// প্রাপ্তবয়স্ক</span>
+
+<span class="cmt">// Null coalescing (??) — isset() এর সংক্ষেপ</span>
+<span class="var">$username</span> <span class="op">=</span> <span class="var">$_GET</span><span class="op">[</span><span class="str">'user'</span><span class="op">]</span> <span class="op">??</span> <span class="str">"অতিথি"</span><span class="op">;</span>
+<span class="kw">echo</span> <span class="var">$username</span><span class="op">;</span>  <span class="cmt">// URL-এ user না থাকলে "অতিথি"</span>
+<span class="kw">?&gt;</span></pre>
+</div>
+<div class="output-box"><span class="output-label">▶ OUTPUT</span>গ্রেড: A<br>প্রাপ্তবয়স্ক<br>অতিথি</div>
+
+<div class="code-card">
+<div class="code-header">
+  <div class="code-dots"><span class="cd cd-r"></span><span class="cd cd-y"></span><span class="cd cd-g"></span></div>
+  <span class="code-tag">switch.php — বার নির্ধারণ</span>
+</div>
+<pre class="php-code"><span class="kw">&lt;?php</span>
+<span class="var">$day</span> <span class="op">=</span> <span class="str">"friday"</span><span class="op">;</span>
+
+<span class="kw">switch</span> <span class="op">(</span><span class="var">$day</span><span class="op">) {</span>
+    <span class="kw">case</span> <span class="str">"saturday"</span><span class="op">:</span>
+    <span class="kw">case</span> <span class="str">"sunday"</span><span class="op">:</span>
+        <span class="kw">echo</span> <span class="str">"সাপ্তাহিক ছুটি! 🎉"</span><span class="op">;</span>
+        <span class="kw">break</span><span class="op">;</span>
+    <span class="kw">case</span> <span class="str">"friday"</span><span class="op">:</span>
+        <span class="kw">echo</span> <span class="str">"জুম্মার দিন! 🕌"</span><span class="op">;</span>  <span class="cmt">// এটা চলবে</span>
+        <span class="kw">break</span><span class="op">;</span>
+    <span class="kw">default</span><span class="op">:</span>
+        <span class="kw">echo</span> <span class="str">"কর্মদিবস 📅"</span><span class="op">;</span>
+<span class="op">}</span>
+<span class="kw">?&gt;</span></pre>
+</div>
+<div class="output-box"><span class="output-label">▶ OUTPUT</span>জুম্মার দিন! 🕌</div>
+
+<div class="info-box info-amber">
+<strong>⚠️ break ভুলবে না!</strong> switch-এ প্রতিটি case-এর শেষে <code>break</code> না দিলে নিচের case-ও চলতে থাকে — এটাকে "fall-through" বলে।
+</div>
+
+<div class="quiz-wrap">
+<div class="quiz-q">❓ Ternary operator-এর সঠিক syntax কোনটি?</div>
+<div class="quiz-options">
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">if($x) ? "yes" : "no"</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,true)">$x > 0 ? "হ্যাঁ" : "না"</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">$x ? {"yes"} : {"no"}</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">ternary($x, "yes", "no")</button>
+</div>
+</div>`
+      },
+      {
+        title:'লুপ — for, while, foreach',
+        tag:'Loops',
+        desc:'একই কাজ বারবার করার জন্য লুপ ব্যবহার করা হয়।',
+        content:`
+<div class="concept-block">
+<h3>🔁 লুপ (Loop)</h3>
+<p>লুপ একটি কোড বারবার চালায় যতক্ষণ শর্ত সত্য থাকে। PHP-তে <span class="hl">4 ধরনের লুপ</span> আছে।</p>
+</div>
+
+<div class="code-card">
+<div class="code-header"><div class="code-dots"><span class="cd cd-r"></span><span class="cd cd-y"></span><span class="cd cd-g"></span></div><span class="code-tag">for-loop.php</span></div>
+<pre class="php-code"><span class="kw">&lt;?php</span>
+<span class="cmt">// for loop — নির্দিষ্ট সংখ্যকবার চালাও</span>
+<span class="kw">for</span> <span class="op">(</span><span class="var">$i</span> <span class="op">=</span> <span class="num">1</span><span class="op">;</span> <span class="var">$i</span> <span class="op">&lt;=</span> <span class="num">5</span><span class="op">;</span> <span class="var">$i</span><span class="op">++) {</span>
+    <span class="kw">echo</span> <span class="str">"সংখ্যা: <span class="var">$i</span>&lt;br&gt;"</span><span class="op">;</span>
+<span class="op">}</span>
+
+<span class="cmt">// while loop — শর্ত সত্য হলে চলতে থাকে</span>
+<span class="var">$count</span> <span class="op">=</span> <span class="num">1</span><span class="op">;</span>
+<span class="kw">while</span> <span class="op">(</span><span class="var">$count</span> <span class="op">&lt;=</span> <span class="num">3</span><span class="op">) {</span>
+    <span class="kw">echo</span> <span class="str">"পুনরাবৃত্তি: <span class="var">$count</span>&lt;br&gt;"</span><span class="op">;</span>
+    <span class="var">$count</span><span class="op">++;</span>
+<span class="op">}</span>
+
+<span class="cmt">// do-while — একবার অবশ্যই চলে, তারপর শর্ত দেখে</span>
+<span class="var">$x</span> <span class="op">=</span> <span class="num">10</span><span class="op">;</span>
+<span class="kw">do</span> <span class="op">{</span>
+    <span class="kw">echo</span> <span class="str">"x = <span class="var">$x</span>"</span><span class="op">;</span>
+    <span class="var">$x</span><span class="op">++;</span>
+<span class="op">}</span> <span class="kw">while</span> <span class="op">(</span><span class="var">$x</span> <span class="op">&lt;</span> <span class="num">10</span><span class="op">);</span>  <span class="cmt">// শর্ত false, তবু একবার চলে</span>
+
+<span class="cmt">// foreach — array-র জন্য সেরা</span>
+<span class="var">$fruits</span> <span class="op">=</span> <span class="op">[</span><span class="str">"আম"</span><span class="op">,</span> <span class="str">"কাঁঠাল"</span><span class="op">,</span> <span class="str">"লিচু"</span><span class="op">];</span>
+<span class="kw">foreach</span> <span class="op">(</span><span class="var">$fruits</span> <span class="kw">as</span> <span class="var">$fruit</span><span class="op">) {</span>
+    <span class="kw">echo</span> <span class="str">"ফল: <span class="var">$fruit</span>&lt;br&gt;"</span><span class="op">;</span>
+<span class="op">}</span>
+
+<span class="cmt">// foreach — key => value</span>
+<span class="var">$student</span> <span class="op">=</span> <span class="op">[</span><span class="str">"নাম"</span> <span class="op">=&gt;</span> <span class="str">"করিম"</span><span class="op">,</span> <span class="str">"বয়স"</span> <span class="op">=&gt;</span> <span class="num">20</span><span class="op">];</span>
+<span class="kw">foreach</span> <span class="op">(</span><span class="var">$student</span> <span class="kw">as</span> <span class="var">$key</span> <span class="op">=&gt;</span> <span class="var">$val</span><span class="op">) {</span>
+    <span class="kw">echo</span> <span class="str">"<span class="var">$key</span>: <span class="var">$val</span>&lt;br&gt;"</span><span class="op">;</span>
+<span class="op">}</span>
+
+<span class="cmt">// break এবং continue</span>
+<span class="kw">for</span> <span class="op">(</span><span class="var">$i</span> <span class="op">=</span> <span class="num">1</span><span class="op">;</span> <span class="var">$i</span> <span class="op">&lt;=</span> <span class="num">10</span><span class="op">;</span> <span class="var">$i</span><span class="op">++) {</span>
+    <span class="kw">if</span> <span class="op">(</span><span class="var">$i</span> <span class="op">==</span> <span class="num">5</span><span class="op">) </span><span class="kw">continue</span><span class="op">;</span>  <span class="cmt">// 5 skip করো</span>
+    <span class="kw">if</span> <span class="op">(</span><span class="var">$i</span> <span class="op">==</span> <span class="num">8</span><span class="op">) </span><span class="kw">break</span><span class="op">;</span>     <span class="cmt">// 8-এ বন্ধ</span>
+    <span class="kw">echo</span> <span class="var">$i</span> <span class="op">.</span> <span class="str">" "</span><span class="op">;</span>
+<span class="op">}</span>  <span class="cmt">// Output: 1 2 3 4 6 7</span>
+<span class="kw">?&gt;</span></pre>
+</div>
+<div class="output-box"><span class="output-label">▶ OUTPUT</span>সংখ্যা: 1, 2, 3, 4, 5<br>পুনরাবৃত্তি: 1, 2, 3<br>x = 10<br>ফল: আম, কাঁঠাল, লিচু<br>নাম: করিম | বয়স: 20<br>1 2 3 4 6 7</div>
+
+<div class="quiz-wrap">
+<div class="quiz-q">❓ Array-এর প্রতিটি element access করতে সবচেয়ে ভালো লুপ কোনটি?</div>
+<div class="quiz-options">
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">for loop</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">while loop</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,true)">foreach loop</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">do-while loop</button>
+</div>
+</div>`
+      },
+      {
+        title:'ফাংশন — তৈরি ও ব্যবহার',
+        tag:'Functions',
+        desc:'বারবার ব্যবহারযোগ্য কোড ফাংশনে রাখা হয়।',
+        content:`
+<div class="concept-block">
+<h3>⚡ ফাংশন (Function)</h3>
+<p>ফাংশন হলো পুনরায় ব্যবহারযোগ্য কোডের ব্লক। একবার লিখলে যেকোনো জায়গা থেকে call করা যায়।</p>
+</div>
+
+<div class="code-card">
+<div class="code-header"><div class="code-dots"><span class="cd cd-r"></span><span class="cd cd-y"></span><span class="cd cd-g"></span></div><span class="code-tag">functions.php</span></div>
+<pre class="php-code"><span class="kw">&lt;?php</span>
+<span class="cmt">// সাধারণ ফাংশন</span>
+<span class="kw">function</span> <span class="fn">greet</span><span class="op">() {</span>
+    <span class="kw">echo</span> <span class="str">"আস্সালামু আলাইকুম!"</span><span class="op">;</span>
+<span class="op">}</span>
+<span class="fn">greet</span><span class="op">();</span>
+
+<span class="cmt">// প্যারামিটার সহ ফাংশন</span>
+<span class="kw">function</span> <span class="fn">sayHello</span><span class="op">(</span><span class="var">$name</span><span class="op">) {</span>
+    <span class="kw">echo</span> <span class="str">"হ্যালো, <span class="var">$name</span>!"</span><span class="op">;</span>
+<span class="op">}</span>
+<span class="fn">sayHello</span><span class="op">(</span><span class="str">"রাহেলা"</span><span class="op">);</span>
+
+<span class="cmt">// Default value সহ</span>
+<span class="kw">function</span> <span class="fn">greetUser</span><span class="op">(</span><span class="var">$name</span> <span class="op">=</span> <span class="str">"অতিথি"</span><span class="op">) {</span>
+    <span class="kw">return</span> <span class="str">"স্বাগতম, <span class="var">$name</span>!"</span><span class="op">;</span>
+<span class="op">}</span>
+<span class="kw">echo</span> <span class="fn">greetUser</span><span class="op">();</span>          <span class="cmt">// স্বাগতম, অতিথি!</span>
+<span class="kw">echo</span> <span class="fn">greetUser</span><span class="op">(</span><span class="str">"করিম"</span><span class="op">);</span>  <span class="cmt">// স্বাগতম, করিম!</span>
+
+<span class="cmt">// Return value সহ</span>
+<span class="kw">function</span> <span class="fn">add</span><span class="op">(</span><span class="var">$a</span><span class="op">,</span> <span class="var">$b</span><span class="op">) {</span>
+    <span class="kw">return</span> <span class="var">$a</span> <span class="op">+</span> <span class="var">$b</span><span class="op">;</span>
+<span class="op">}</span>
+<span class="var">$sum</span> <span class="op">=</span> <span class="fn">add</span><span class="op">(</span><span class="num">10</span><span class="op">,</span> <span class="num">20</span><span class="op">);</span>
+<span class="kw">echo</span> <span class="var">$sum</span><span class="op">;</span>  <span class="cmt">// 30</span>
+
+<span class="cmt">// Arrow function (PHP 7.4+)</span>
+<span class="var">$multiply</span> <span class="op">=</span> <span class="kw">fn</span><span class="op">(</span><span class="var">$x</span><span class="op">,</span> <span class="var">$y</span><span class="op">) =&gt;</span> <span class="var">$x</span> <span class="op">*</span> <span class="var">$y</span><span class="op">;</span>
+<span class="kw">echo</span> <span class="var">$multiply</span><span class="op">(</span><span class="num">4</span><span class="op">,</span> <span class="num">5</span><span class="op">);</span>  <span class="cmt">// 20</span>
+
+<span class="cmt">// Variadic function — যেকোনো সংখ্যক argument</span>
+<span class="kw">function</span> <span class="fn">sumAll</span><span class="op">(...</span><span class="var">$nums</span><span class="op">) {</span>
+    <span class="kw">return</span> <span class="fn">array_sum</span><span class="op">(</span><span class="var">$nums</span><span class="op">);</span>
+<span class="op">}</span>
+<span class="kw">echo</span> <span class="fn">sumAll</span><span class="op">(</span><span class="num">1</span><span class="op">,</span> <span class="num">2</span><span class="op">,</span> <span class="num">3</span><span class="op">,</span> <span class="num">4</span><span class="op">,</span> <span class="num">5</span><span class="op">);</span>  <span class="cmt">// 15</span>
+<span class="kw">?&gt;</span></pre>
+</div>
+<div class="output-box"><span class="output-label">▶ OUTPUT</span>আস্সালামু আলাইকুম!<br>হ্যালো, রাহেলা!<br>স্বাগতম, অতিথি! | স্বাগতম, করিম!<br>30 | 20 | 15</div>
+
+<div class="quiz-wrap">
+<div class="quiz-q">❓ ফাংশন থেকে মান ফিরিয়ে দিতে কোন keyword ব্যবহার হয়?</div>
+<div class="quiz-options">
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">give</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">output</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,true)">return</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">send</button>
+</div>
+</div>`
+      },
+      {
+        title:'অ্যারে — তিন ধরন ও ফাংশন',
+        tag:'Arrays',
+        desc:'PHP Array-এ একসাথে অনেক মান রাখা যায়।',
+        content:`
+<div class="concept-block">
+<h3>📚 অ্যারে (Array)</h3>
+<p>Array হলো একসাথে অনেক মান রাখার পাত্র। PHP-তে <span class="hl">৩ ধরনের Array</span> আছে।</p>
+</div>
+
+<div class="code-card">
+<div class="code-header"><div class="code-dots"><span class="cd cd-r"></span><span class="cd cd-y"></span><span class="cd cd-g"></span></div><span class="code-tag">arrays.php</span></div>
+<pre class="php-code"><span class="kw">&lt;?php</span>
+<span class="cmt">// ১. Indexed Array — সংখ্যা index</span>
+<span class="var">$colors</span> <span class="op">=</span> <span class="op">[</span><span class="str">"লাল"</span><span class="op">,</span> <span class="str">"নীল"</span><span class="op">,</span> <span class="str">"সবুজ"</span><span class="op">];</span>
+<span class="kw">echo</span> <span class="var">$colors</span><span class="op">[</span><span class="num">0</span><span class="op">];</span>  <span class="cmt">// লাল</span>
+<span class="kw">echo</span> <span class="fn">count</span><span class="op">(</span><span class="var">$colors</span><span class="op">);</span>  <span class="cmt">// 3</span>
+
+<span class="cmt">// ২. Associative Array — নামযুক্ত key</span>
+<span class="var">$student</span> <span class="op">=</span> <span class="op">[</span>
+    <span class="str">"নাম"</span>  <span class="op">=&gt;</span> <span class="str">"আরিফ"</span><span class="op">,</span>
+    <span class="str">"বয়স"</span> <span class="op">=&gt;</span> <span class="num">22</span><span class="op">,</span>
+    <span class="str">"cgpa"</span> <span class="op">=&gt;</span> <span class="num">3.85</span>
+<span class="op">];</span>
+<span class="kw">echo</span> <span class="var">$student</span><span class="op">[</span><span class="str">"নাম"</span><span class="op">];</span>  <span class="cmt">// আরিফ</span>
+
+<span class="cmt">// ৩. Multidimensional — array-র ভেতর array</span>
+<span class="var">$class</span> <span class="op">=</span> <span class="op">[</span>
+    <span class="op">[</span><span class="str">"নাম"</span> <span class="op">=&gt;</span> <span class="str">"রিমা"</span><span class="op">,</span> <span class="str">"নম্বর"</span> <span class="op">=&gt;</span> <span class="num">85</span><span class="op">],</span>
+    <span class="op">[</span><span class="str">"নাম"</span> <span class="op">=&gt;</span> <span class="str">"করিম"</span><span class="op">,</span> <span class="str">"নম্বর"</span> <span class="op">=&gt;</span> <span class="num">72</span><span class="op">],</span>
+<span class="op">];</span>
+<span class="kw">echo</span> <span class="var">$class</span><span class="op">[</span><span class="num">0</span><span class="op">][</span><span class="str">"নাম"</span><span class="op">];</span>  <span class="cmt">// রিমা</span>
+
+<span class="cmt">// গুরুত্বপূর্ণ Array ফাংশন</span>
+<span class="var">$nums</span> <span class="op">=</span> <span class="op">[</span><span class="num">3</span><span class="op">,</span><span class="num">1</span><span class="op">,</span><span class="num">4</span><span class="op">,</span><span class="num">1</span><span class="op">,</span><span class="num">5</span><span class="op">,</span><span class="num">9</span><span class="op">];</span>
+<span class="fn">sort</span><span class="op">(</span><span class="var">$nums</span><span class="op">);</span>              <span class="cmt">// ছোট থেকে বড় sort</span>
+<span class="fn">array_push</span><span class="op">(</span><span class="var">$nums</span><span class="op">,</span> <span class="num">10</span><span class="op">);</span>    <span class="cmt">// শেষে যোগ করো</span>
+<span class="fn">array_pop</span><span class="op">(</span><span class="var">$nums</span><span class="op">);</span>         <span class="cmt">// শেষেরটা বাদ দাও</span>
+<span class="fn">array_reverse</span><span class="op">(</span><span class="var">$nums</span><span class="op">);</span>     <span class="cmt">// উল্টো করো</span>
+<span class="fn">in_array</span><span class="op">(</span><span class="num">5</span><span class="op">,</span> <span class="var">$nums</span><span class="op">);</span>       <span class="cmt">// আছে কিনা → true</span>
+<span class="fn">array_unique</span><span class="op">(</span><span class="var">$nums</span><span class="op">);</span>      <span class="cmt">// duplicate বাদ দাও</span>
+<span class="fn">implode</span><span class="op">(</span><span class="str">", "</span><span class="op">,</span> <span class="var">$nums</span><span class="op">);</span>     <span class="cmt">// array → string</span>
+<span class="fn">explode</span><span class="op">(</span><span class="str">","</span><span class="op">,</span> <span class="str">"a,b,c"</span><span class="op">);</span>  <span class="cmt">// string → array</span>
+
+<span class="cmt">// array_map — প্রতিটি element-এ function প্রয়োগ</span>
+<span class="var">$prices</span> <span class="op">=</span> <span class="op">[</span><span class="num">100</span><span class="op">,</span> <span class="num">200</span><span class="op">,</span> <span class="num">300</span><span class="op">];</span>
+<span class="var">$discounted</span> <span class="op">=</span> <span class="fn">array_map</span><span class="op">(</span><span class="kw">fn</span><span class="op">(</span><span class="var">$p</span><span class="op">) =&gt;</span> <span class="var">$p</span> <span class="op">*</span> <span class="num">0.9</span><span class="op">,</span> <span class="var">$prices</span><span class="op">);</span>
+<span class="cmt">// [90, 180, 270]</span>
+<span class="kw">?&gt;</span></pre>
+</div>
+<div class="output-box"><span class="output-label">▶ OUTPUT</span>লাল | 3<br>আরিফ | রিমা<br>Sorted: 1, 1, 3, 4, 5, 9<br>Discounted: 90, 180, 270</div>
+
+<div class="quiz-wrap">
+<div class="quiz-q">❓ <code>implode(", ", ["ক", "খ", "গ"])</code> এর output কী?</div>
+<div class="quiz-options">
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">["ক", "খ", "গ"]</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,true)">ক, খ, গ</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">ক খ গ</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">Error</button>
+</div>
+</div>`
+      }
+    ]
+  },
+  {
+    id:'p3', color:'#f5a623', name:'ধাপ ৩ — ওয়েব ফিচার',
+    lessons:[
+      {
+        title:'ফর্ম — GET ও POST',
+        tag:'Form Handling',
+        desc:'HTML ফর্ম থেকে ডেটা নেওয়া এবং PHP দিয়ে প্রসেস করা।',
+        content:`
+<div class="concept-block">
+<h3>📋 ফর্ম হ্যান্ডলিং</h3>
+<p>HTML ফর্ম থেকে ডেটা PHP-তে আসে <span class="hl">$_GET</span> বা <span class="hl">$_POST</span> superglobal দিয়ে।</p>
+<ul style="margin-top:.5rem">
+<li><strong>GET:</strong> URL-এ দেখা যায়, ছোট ডেটার জন্য, search-এ ব্যবহার হয়</li>
+<li><strong>POST:</strong> URL-এ দেখায় না, password/sensitive data-র জন্য</li>
+</ul>
+</div>
+
+<div class="code-card">
+<div class="code-header"><div class="code-dots"><span class="cd cd-r"></span><span class="cd cd-y"></span><span class="cd cd-g"></span></div><span class="code-tag">form.php — login form example</span></div>
+<pre class="php-code"><span class="kw">&lt;?php</span>
+<span class="cmt">// ফর্ম submit হয়েছে কিনা চেক করো</span>
+<span class="kw">if</span> <span class="op">(</span><span class="var">$_SERVER</span><span class="op">[</span><span class="str">"REQUEST_METHOD"</span><span class="op">]</span> <span class="op">==</span> <span class="str">"POST"</span><span class="op">) {</span>
+
+    <span class="cmt">// ডেটা নেওয়া ও sanitize করা</span>
+    <span class="var">$name</span> <span class="op">=</span> <span class="fn">htmlspecialchars</span><span class="op">(</span><span class="fn">trim</span><span class="op">(</span><span class="var">$_POST</span><span class="op">[</span><span class="str">"name"</span><span class="op">]));</span>
+    <span class="var">$email</span> <span class="op">=</span> <span class="fn">filter_var</span><span class="op">(</span><span class="var">$_POST</span><span class="op">[</span><span class="str">"email"</span><span class="op">],</span> <span class="cls">FILTER_SANITIZE_EMAIL</span><span class="op">);</span>
+    <span class="var">$age</span> <span class="op">=</span> <span class="op">(</span><span class="kw">int</span><span class="op">)</span><span class="var">$_POST</span><span class="op">[</span><span class="str">"age"</span><span class="op">];</span>
+
+    <span class="cmt">// Validation</span>
+    <span class="var">$errors</span> <span class="op">=</span> <span class="op">[];</span>
+    <span class="kw">if</span> <span class="op">(</span><span class="fn">empty</span><span class="op">(</span><span class="var">$name</span><span class="op">)) {</span>
+        <span class="var">$errors</span><span class="op">[] =</span> <span class="str">"নাম আবশ্যক"</span><span class="op">;</span>
+    <span class="op">}</span>
+    <span class="kw">if</span> <span class="op">(!</span><span class="fn">filter_var</span><span class="op">(</span><span class="var">$email</span><span class="op">,</span> <span class="cls">FILTER_VALIDATE_EMAIL</span><span class="op">)) {</span>
+        <span class="var">$errors</span><span class="op">[] =</span> <span class="str">"সঠিক email দিন"</span><span class="op">;</span>
+    <span class="op">}</span>
+    <span class="kw">if</span> <span class="op">(</span><span class="var">$age</span> <span class="op">&lt;</span> <span class="num">18</span><span class="op">) {</span>
+        <span class="var">$errors</span><span class="op">[] =</span> <span class="str">"বয়স কমপক্ষে ১৮ হতে হবে"</span><span class="op">;</span>
+    <span class="op">}</span>
+
+    <span class="kw">if</span> <span class="op">(</span><span class="fn">empty</span><span class="op">(</span><span class="var">$errors</span><span class="op">)) {</span>
+        <span class="kw">echo</span> <span class="str">"✅ ধন্যবাদ, <span class="var">$name</span>! রেজিস্ট্রেশন সফল।"</span><span class="op">;</span>
+    <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span>
+        <span class="kw">foreach</span> <span class="op">(</span><span class="var">$errors</span> <span class="kw">as</span> <span class="var">$error</span><span class="op">) {</span>
+            <span class="kw">echo</span> <span class="str">"❌ <span class="var">$error</span>&lt;br&gt;"</span><span class="op">;</span>
+        <span class="op">}</span>
+    <span class="op">}</span>
+<span class="op">}</span>
+<span class="kw">?&gt;</span>
+
+<span class="cmt">&lt;!-- HTML Form --&gt;</span>
+&lt;form method=<span class="str">"POST"</span> action=<span class="str">"form.php"</span>&gt;
+    &lt;input type=<span class="str">"text"</span> name=<span class="str">"name"</span> placeholder=<span class="str">"আপনার নাম"</span>&gt;
+    &lt;input type=<span class="str">"email"</span> name=<span class="str">"email"</span> placeholder=<span class="str">"email"</span>&gt;
+    &lt;input type=<span class="str">"number"</span> name=<span class="str">"age"</span> placeholder=<span class="str">"বয়স"</span>&gt;
+    &lt;button type=<span class="str">"submit"</span>&gt;রেজিস্ট্রেশন&lt;/button&gt;
+&lt;/form&gt;</pre>
+</div>
+
+<div class="info-box info-red">
+<strong>🔐 Security:</strong> ব্যবহারকারীর ইনপুট সবসময় sanitize করো। <code>htmlspecialchars()</code> XSS আক্রমণ থেকে রক্ষা করে। কখনো raw input সরাসরি DB-তে দিও না।
+</div>
+
+<div class="quiz-wrap">
+<div class="quiz-q">❓ Password field কোন method-এ পাঠানো উচিত?</div>
+<div class="quiz-options">
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">GET — কারণ সহজ</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,true)">POST — URL-এ দেখা যায় না</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">PUT — সবচেয়ে নিরাপদ</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">যেকোনো একটা</button>
+</div>
+</div>`
+      },
+      {
+        title:'সেশন ও কুকি',
+        tag:'Session & Cookie',
+        desc:'ব্যবহারকারীর তথ্য সংরক্ষণ করতে session ও cookie ব্যবহার হয়।',
+        content:`
+<div class="concept-block">
+<h3>🍪 Session ও Cookie</h3>
+<p>HTTP stateless — প্রতিটি request আলাদা। Session ও Cookie দিয়ে ব্যবহারকারীর অবস্থা মনে রাখা হয়।</p>
+<ul style="margin-top:.5rem">
+<li><strong>Session:</strong> সার্ভারে সংরক্ষিত, ব্রাউজার বন্ধে মুছে যায়</li>
+<li><strong>Cookie:</strong> ব্রাউজারে সংরক্ষিত, নির্দিষ্ট সময় পর্যন্ত থাকে</li>
+</ul>
+</div>
+
+<div class="code-card">
+<div class="code-header"><div class="code-dots"><span class="cd cd-r"></span><span class="cd cd-y"></span><span class="cd cd-g"></span></div><span class="code-tag">session-cookie.php</span></div>
+<pre class="php-code"><span class="kw">&lt;?php</span>
+<span class="cmt">// === SESSION ===</span>
+<span class="fn">session_start</span><span class="op">();</span>  <span class="cmt">// সবার আগে call করতে হবে</span>
+
+<span class="cmt">// Session সেট করা</span>
+<span class="var">$_SESSION</span><span class="op">[</span><span class="str">"user_id"</span><span class="op">] =</span> <span class="num">42</span><span class="op">;</span>
+<span class="var">$_SESSION</span><span class="op">[</span><span class="str">"username"</span><span class="op">] =</span> <span class="str">"রাহেলা"</span><span class="op">;</span>
+<span class="var">$_SESSION</span><span class="op">[</span><span class="str">"role"</span><span class="op">] =</span> <span class="str">"admin"</span><span class="op">;</span>
+
+<span class="cmt">// Session পড়া</span>
+<span class="kw">echo</span> <span class="str">"লগিন করেছেন: "</span> <span class="op">.</span> <span class="var">$_SESSION</span><span class="op">[</span><span class="str">"username"</span><span class="op">];</span>
+
+<span class="cmt">// Login check</span>
+<span class="kw">if</span> <span class="op">(!</span><span class="fn">isset</span><span class="op">(</span><span class="var">$_SESSION</span><span class="op">[</span><span class="str">"user_id"</span><span class="op">])) {</span>
+    <span class="fn">header</span><span class="op">(</span><span class="str">"Location: login.php"</span><span class="op">);</span>  <span class="cmt">// redirect</span>
+    <span class="kw">exit</span><span class="op">;</span>
+<span class="op">}</span>
+
+<span class="cmt">// Logout — session মুছে ফেলা</span>
+<span class="fn">session_unset</span><span class="op">();</span>   <span class="cmt">// সব session মুছো</span>
+<span class="fn">session_destroy</span><span class="op">();</span> <span class="cmt">// session শেষ করো</span>
+
+<span class="cmt">// === COOKIE ===</span>
+<span class="cmt">// Cookie সেট করা (30 দিনের জন্য)</span>
+<span class="fn">setcookie</span><span class="op">(</span>
+    <span class="str">"theme"</span><span class="op">,</span>               <span class="cmt">// নাম</span>
+    <span class="str">"dark"</span><span class="op">,</span>               <span class="cmt">// মান</span>
+    <span class="fn">time</span><span class="op">() +</span> <span class="num">30</span> <span class="op">*</span> <span class="num">24</span> <span class="op">*</span> <span class="num">3600</span>  <span class="cmt">// expiry</span>
+<span class="op">);</span>
+
+<span class="cmt">// Cookie পড়া</span>
+<span class="kw">if</span> <span class="op">(</span><span class="fn">isset</span><span class="op">(</span><span class="var">$_COOKIE</span><span class="op">[</span><span class="str">"theme"</span><span class="op">])) {</span>
+    <span class="var">$theme</span> <span class="op">=</span> <span class="var">$_COOKIE</span><span class="op">[</span><span class="str">"theme"</span><span class="op">];</span>
+    <span class="kw">echo</span> <span class="str">"থিম: <span class="var">$theme</span>"</span><span class="op">;</span>  <span class="cmt">// dark</span>
+<span class="op">}</span>
+
+<span class="cmt">// Cookie মুছে ফেলা (past time দিয়ে)</span>
+<span class="fn">setcookie</span><span class="op">(</span><span class="str">"theme"</span><span class="op">,</span> <span class="str">""</span><span class="op">,</span> <span class="fn">time</span><span class="op">() -</span> <span class="num">3600</span><span class="op">);</span>
+<span class="kw">?&gt;</span></pre>
+</div>
+<div class="output-box"><span class="output-label">▶ OUTPUT</span>লগিন করেছেন: রাহেলা<br>থিম: dark</div>
+
+<div class="quiz-wrap">
+<div class="quiz-q">❓ Session শুরু করতে কোন ফাংশন call করতে হয়?</div>
+<div class="quiz-options">
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">start_session()</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,true)">session_start()</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">init_session()</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">begin_session()</button>
+</div>
+</div>`
+      }
+    ]
+  },
+  {
+    id:'p4', color:'#4da6ff', name:'ধাপ ৪ — ডেটাবেস',
+    lessons:[
+      {
+        title:'MySQL সংযোগ — PDO ও MySQLi',
+        tag:'Database',
+        desc:'PHP থেকে MySQL ডেটাবেসে সংযোগ স্থাপন করা।',
+        content:`
+<div class="concept-block">
+<h3>🗄️ MySQL সংযোগ</h3>
+<p>PHP-তে MySQL ব্যবহারের দুটো উপায়: <span class="hl">PDO</span> (বেশি recommended) এবং <span class="hl">MySQLi</span>।</p>
+<ul style="margin-top:.5rem">
+<li><strong>PDO:</strong> Multiple database support, সবচেয়ে ভালো</li>
+<li><strong>MySQLi:</strong> শুধু MySQL, OOP ও procedural দুটোতেই কাজ করে</li>
+</ul>
+</div>
+
+<div class="code-card">
+<div class="code-header"><div class="code-dots"><span class="cd cd-r"></span><span class="cd cd-y"></span><span class="cd cd-g"></span></div><span class="code-tag">database.php — PDO connection</span></div>
+<pre class="php-code"><span class="kw">&lt;?php</span>
+<span class="cmt">// === PDO দিয়ে সংযোগ (Recommended) ===</span>
+<span class="var">$host</span> <span class="op">=</span> <span class="str">"localhost"</span><span class="op">;</span>
+<span class="var">$dbname</span> <span class="op">=</span> <span class="str">"school_db"</span><span class="op">;</span>
+<span class="var">$user</span> <span class="op">=</span> <span class="str">"root"</span><span class="op">;</span>
+<span class="var">$pass</span> <span class="op">=</span> <span class="str">""</span><span class="op">;</span>
+
+<span class="kw">try</span> <span class="op">{</span>
+    <span class="var">$pdo</span> <span class="op">=</span> <span class="kw">new</span> <span class="cls">PDO</span><span class="op">(</span>
+        <span class="str">"mysql:host=<span class="var">$host</span>;dbname=<span class="var">$dbname</span>;charset=utf8"</span><span class="op">,</span>
+        <span class="var">$user</span><span class="op">,</span> <span class="var">$pass</span>
+    <span class="op">);</span>
+    <span class="var">$pdo</span><span class="op">-&gt;</span><span class="fn">setAttribute</span><span class="op">(</span><span class="cls">PDO</span><span class="op">::</span><span class="cls">ATTR_ERRMODE</span><span class="op">,</span>
+                        <span class="cls">PDO</span><span class="op">::</span><span class="cls">ERRMODE_EXCEPTION</span><span class="op">);</span>
+    <span class="kw">echo</span> <span class="str">"✅ সংযোগ সফল!"</span><span class="op">;</span>
+<span class="op">}</span> <span class="kw">catch</span> <span class="op">(</span><span class="cls">PDOException</span> <span class="var">$e</span><span class="op">) {</span>
+    <span class="kw">die</span><span class="op">(</span><span class="str">"❌ সংযোগ ব্যর্থ: "</span> <span class="op">.</span> <span class="var">$e</span><span class="op">-&gt;</span><span class="fn">getMessage</span><span class="op">());</span>
+<span class="op">}</span>
+
+<span class="cmt">// === CRUD Operations ===</span>
+
+<span class="cmt">// INSERT — ডেটা ঢোকানো (Prepared Statement)</span>
+<span class="var">$sql</span> <span class="op">=</span> <span class="str">"INSERT INTO students (name, email, marks)
+        VALUES (:name, :email, :marks)"</span><span class="op">;</span>
+<span class="var">$stmt</span> <span class="op">=</span> <span class="var">$pdo</span><span class="op">-&gt;</span><span class="fn">prepare</span><span class="op">(</span><span class="var">$sql</span><span class="op">);</span>
+<span class="var">$stmt</span><span class="op">-&gt;</span><span class="fn">execute</span><span class="op">([</span>
+    <span class="str">":name"</span>  <span class="op">=&gt;</span> <span class="str">"আরিফ হোসেন"</span><span class="op">,</span>
+    <span class="str">":email"</span> <span class="op">=&gt;</span> <span class="str">"arif@gmail.com"</span><span class="op">,</span>
+    <span class="str">":marks"</span> <span class="op">=&gt;</span> <span class="num">88</span>
+<span class="op">]);</span>
+<span class="kw">echo</span> <span class="str">"নতুন ID: "</span> <span class="op">.</span> <span class="var">$pdo</span><span class="op">-&gt;</span><span class="fn">lastInsertId</span><span class="op">();</span>
+
+<span class="cmt">// SELECT — ডেটা পড়া</span>
+<span class="var">$stmt</span> <span class="op">=</span> <span class="var">$pdo</span><span class="op">-&gt;</span><span class="fn">query</span><span class="op">(</span><span class="str">"SELECT * FROM students ORDER BY marks DESC"</span><span class="op">);</span>
+<span class="var">$students</span> <span class="op">=</span> <span class="var">$stmt</span><span class="op">-&gt;</span><span class="fn">fetchAll</span><span class="op">(</span><span class="cls">PDO</span><span class="op">::</span><span class="cls">FETCH_ASSOC</span><span class="op">);</span>
+<span class="kw">foreach</span> <span class="op">(</span><span class="var">$students</span> <span class="kw">as</span> <span class="var">$s</span><span class="op">) {</span>
+    <span class="kw">echo</span> <span class="var">$s</span><span class="op">[</span><span class="str">'name'</span><span class="op">]</span> <span class="op">.</span> <span class="str">" — "</span> <span class="op">.</span> <span class="var">$s</span><span class="op">[</span><span class="str">'marks'</span><span class="op">]</span><span class="op">;</span>
+<span class="op">}</span>
+
+<span class="cmt">// UPDATE</span>
+<span class="var">$stmt</span> <span class="op">=</span> <span class="var">$pdo</span><span class="op">-&gt;</span><span class="fn">prepare</span><span class="op">(</span><span class="str">"UPDATE students SET marks=:m WHERE id=:id"</span><span class="op">);</span>
+<span class="var">$stmt</span><span class="op">-&gt;</span><span class="fn">execute</span><span class="op">([</span><span class="str">":m"</span> <span class="op">=&gt;</span> <span class="num">95</span><span class="op">,</span> <span class="str">":id"</span> <span class="op">=&gt;</span> <span class="num">1</span><span class="op">]);</span>
+
+<span class="cmt">// DELETE</span>
+<span class="var">$stmt</span> <span class="op">=</span> <span class="var">$pdo</span><span class="op">-&gt;</span><span class="fn">prepare</span><span class="op">(</span><span class="str">"DELETE FROM students WHERE id=?"</span><span class="op">);</span>
+<span class="var">$stmt</span><span class="op">-&gt;</span><span class="fn">execute</span><span class="op">([</span><span class="num">5</span><span class="op">]);</span>
+<span class="kw">?&gt;</span></pre>
+</div>
+
+<div class="info-box info-red">
+<strong>⛔ SQL Injection থেকে সাবধান!</strong> কখনো user input সরাসরি SQL-এ দিও না। সবসময় <code>prepare()</code> + <code>execute()</code> ব্যবহার করো — এটাকে Prepared Statement বলে।
+</div>
+
+<div class="quiz-wrap">
+<div class="quiz-q">❓ SQL Injection থেকে বাঁচতে কোনটা ব্যবহার করা উচিত?</div>
+<div class="quiz-options">
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">সরাসরি query তে ইনপুট দাও</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,true)">Prepared Statement ব্যবহার করো</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">ইনপুট uppercase করো</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">GET method ব্যবহার করো</button>
+</div>
+</div>`
+      },
+      {
+        title:'পেজিনেশন — LIMIT ও OFFSET',
+        tag:'Pagination',
+        desc:'বড় ডেটাকে পেজে ভাগ করে দেখানো।',
+        content:`
+<div class="concept-block">
+<h3>📄 পেজিনেশন (Pagination)</h3>
+<p>হাজার হাজার রেকর্ড একসাথে না দেখিয়ে পেজে ভাগ করে দেখানো হয়। MySQL-এ <span class="hl">LIMIT</span> ও <span class="hl">OFFSET</span> দিয়ে করা হয়।</p>
+</div>
+
+<div class="code-card">
+<div class="code-header"><div class="code-dots"><span class="cd cd-r"></span><span class="cd cd-y"></span><span class="cd cd-g"></span></div><span class="code-tag">pagination.php</span></div>
+<pre class="php-code"><span class="kw">&lt;?php</span>
+<span class="var">$per_page</span> <span class="op">=</span> <span class="num">10</span><span class="op">;</span>  <span class="cmt">// প্রতি পেজে কতটা</span>
+<span class="var">$page</span> <span class="op">=</span> <span class="op">(</span><span class="kw">int</span><span class="op">)(</span><span class="var">$_GET</span><span class="op">[</span><span class="str">'page'</span><span class="op">]</span> <span class="op">??</span> <span class="num">1</span><span class="op">);</span>
+<span class="var">$offset</span> <span class="op">=</span> <span class="op">(</span><span class="var">$page</span> <span class="op">-</span> <span class="num">1</span><span class="op">)</span> <span class="op">*</span> <span class="var">$per_page</span><span class="op">;</span>
+
+<span class="cmt">// মোট রেকর্ড সংখ্যা</span>
+<span class="var">$total</span> <span class="op">=</span> <span class="var">$pdo</span><span class="op">-&gt;</span><span class="fn">query</span><span class="op">(</span><span class="str">"SELECT COUNT(*) FROM students"</span><span class="op">)-&gt;</span><span class="fn">fetchColumn</span><span class="op">();</span>
+<span class="var">$total_pages</span> <span class="op">=</span> <span class="fn">ceil</span><span class="op">(</span><span class="var">$total</span> <span class="op">/</span> <span class="var">$per_page</span><span class="op">);</span>
+
+<span class="cmt">// বর্তমান পেজের ডেটা</span>
+<span class="var">$stmt</span> <span class="op">=</span> <span class="var">$pdo</span><span class="op">-&gt;</span><span class="fn">prepare</span><span class="op">(</span>
+    <span class="str">"SELECT * FROM students LIMIT :limit OFFSET :offset"</span>
+<span class="op">);</span>
+<span class="var">$stmt</span><span class="op">-&gt;</span><span class="fn">bindValue</span><span class="op">(</span><span class="str">":limit"</span><span class="op">,</span> <span class="var">$per_page</span><span class="op">,</span> <span class="cls">PDO</span><span class="op">::</span><span class="cls">PARAM_INT</span><span class="op">);</span>
+<span class="var">$stmt</span><span class="op">-&gt;</span><span class="fn">bindValue</span><span class="op">(</span><span class="str">":offset"</span><span class="op">,</span> <span class="var">$offset</span><span class="op">,</span> <span class="cls">PDO</span><span class="op">::</span><span class="cls">PARAM_INT</span><span class="op">);</span>
+<span class="var">$stmt</span><span class="op">-&gt;</span><span class="fn">execute</span><span class="op">();</span>
+<span class="var">$students</span> <span class="op">=</span> <span class="var">$stmt</span><span class="op">-&gt;</span><span class="fn">fetchAll</span><span class="op">();</span>
+
+<span class="cmt">// Pagination links</span>
+<span class="kw">for</span> <span class="op">(</span><span class="var">$i</span> <span class="op">=</span> <span class="num">1</span><span class="op">;</span> <span class="var">$i</span> <span class="op">&lt;=</span> <span class="var">$total_pages</span><span class="op">;</span> <span class="var">$i</span><span class="op">++) {</span>
+    <span class="kw">echo</span> <span class="str">"&lt;a href='?page=<span class="var">$i</span>'&gt;<span class="var">$i</span>&lt;/a&gt; "</span><span class="op">;</span>
+<span class="op">}</span>
+<span class="kw">?&gt;</span></pre>
+</div>
+<div class="output-box"><span class="output-label">▶ CONCEPT</span>পেজ ১: OFFSET 0,  LIMIT 10 → row 1-10<br>পেজ ২: OFFSET 10, LIMIT 10 → row 11-20<br>পেজ ৩: OFFSET 20, LIMIT 10 → row 21-30</div>
+
+<div class="quiz-wrap">
+<div class="quiz-q">❓ পেজ ৩-এ থাকলে এবং প্রতি পেজে ১০টি রেকর্ড হলে OFFSET কত?</div>
+<div class="quiz-options">
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">10</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">25</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,true)">20</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">30</button>
+</div>
+</div>`
+      }
+    ]
+  },
+  {
+    id:'p5', color:'#ff6eb4', name:'ধাপ ৫ — OOP',
+    lessons:[
+      {
+        title:'ক্লাস ও অবজেক্ট',
+        tag:'OOP Basics',
+        desc:'Object Oriented Programming — real-world জিনিসকে code-এ রূপ দেওয়া।',
+        content:`
+<div class="concept-block">
+<h3>🧩 OOP — ক্লাস ও অবজেক্ট</h3>
+<p>OOP মানে কোডকে real-world জিনিসের মতো সাজানো। <span class="hl">Class</span> হলো blueprint, <span class="hl">Object</span> হলো সেই blueprint থেকে তৈরি জিনিস।</p>
+<ul style="margin-top:.5rem">
+<li><strong>Class:</strong> গাড়ির ডিজাইন</li>
+<li><strong>Object:</strong> সেই ডিজাইন থেকে বানানো নির্দিষ্ট গাড়ি</li>
+<li><strong>Property:</strong> গাড়ির রঙ, মডেল</li>
+<li><strong>Method:</strong> গাড়ি চালানো, থামানো</li>
+</ul>
+</div>
+
+<div class="code-card">
+<div class="code-header"><div class="code-dots"><span class="cd cd-r"></span><span class="cd cd-y"></span><span class="cd cd-g"></span></div><span class="code-tag">oop.php — Student Class</span></div>
+<pre class="php-code"><span class="kw">&lt;?php</span>
+<span class="kw">class</span> <span class="cls">Student</span> <span class="op">{</span>
+
+    <span class="cmt">// Properties (Access Modifier সহ)</span>
+    <span class="kw">public</span> <span class="kw">string</span> <span class="var">$name</span><span class="op">;</span>
+    <span class="kw">private</span> <span class="kw">int</span> <span class="var">$marks</span><span class="op">;</span>
+    <span class="kw">protected</span> <span class="kw">string</span> <span class="var">$department</span><span class="op">;</span>
+
+    <span class="cmt">// Constructor — object তৈরির সময় চলে</span>
+    <span class="kw">public function</span> <span class="fn">__construct</span><span class="op">(</span><span class="kw">string</span> <span class="var">$name</span><span class="op">,</span> <span class="kw">int</span> <span class="var">$marks</span><span class="op">) {</span>
+        <span class="var">$this</span><span class="op">-&gt;</span><span class="var">name</span>  <span class="op">=</span> <span class="var">$name</span><span class="op">;</span>
+        <span class="var">$this</span><span class="op">-&gt;</span><span class="var">marks</span> <span class="op">=</span> <span class="var">$marks</span><span class="op">;</span>
+    <span class="op">}</span>
+
+    <span class="cmt">// Method</span>
+    <span class="kw">public function</span> <span class="fn">getGrade</span><span class="op">():</span> <span class="kw">string</span> <span class="op">{</span>
+        <span class="kw">return</span> <span class="kw">match</span><span class="op">(</span><span class="kw">true</span><span class="op">) {</span>
+            <span class="var">$this</span><span class="op">-&gt;</span><span class="var">marks</span> <span class="op">&gt;=</span> <span class="num">80</span> <span class="op">=&gt;</span> <span class="str">"A+"</span><span class="op">,</span>
+            <span class="var">$this</span><span class="op">-&gt;</span><span class="var">marks</span> <span class="op">&gt;=</span> <span class="num">70</span> <span class="op">=&gt;</span> <span class="str">"A"</span><span class="op">,</span>
+            <span class="kw">default</span> <span class="op">=&gt;</span> <span class="str">"B"</span>
+        <span class="op">};</span>
+    <span class="op">}</span>
+
+    <span class="cmt">// Getter (private marks বাইরে দেওয়া)</span>
+    <span class="kw">public function</span> <span class="fn">getMarks</span><span class="op">():</span> <span class="kw">int</span> <span class="op">{</span>
+        <span class="kw">return</span> <span class="var">$this</span><span class="op">-&gt;</span><span class="var">marks</span><span class="op">;</span>
+    <span class="op">}</span>
+
+    <span class="cmt">// Destructor — object শেষ হলে চলে</span>
+    <span class="kw">public function</span> <span class="fn">__destruct</span><span class="op">() {</span>
+        <span class="kw">echo</span> <span class="str">"<span class="var">{$this->name}</span>-এর object মুছে গেছে।"</span><span class="op">;</span>
+    <span class="op">}</span>
+<span class="op">}</span>
+
+<span class="cmt">// Object তৈরি করা</span>
+<span class="var">$s1</span> <span class="op">=</span> <span class="kw">new</span> <span class="cls">Student</span><span class="op">(</span><span class="str">"রাহেলা"</span><span class="op">,</span> <span class="num">85</span><span class="op">);</span>
+<span class="var">$s2</span> <span class="op">=</span> <span class="kw">new</span> <span class="cls">Student</span><span class="op">(</span><span class="str">"করিম"</span><span class="op">,</span> <span class="num">73</span><span class="op">);</span>
+
+<span class="kw">echo</span> <span class="var">$s1</span><span class="op">-&gt;</span><span class="var">name</span><span class="op">;</span>           <span class="cmt">// রাহেলা</span>
+<span class="kw">echo</span> <span class="var">$s1</span><span class="op">-&gt;</span><span class="fn">getGrade</span><span class="op">();</span>    <span class="cmt">// A+</span>
+<span class="kw">echo</span> <span class="var">$s2</span><span class="op">-&gt;</span><span class="fn">getMarks</span><span class="op">();</span>    <span class="cmt">// 73</span>
+<span class="kw">?&gt;</span></pre>
+</div>
+<div class="output-box"><span class="output-label">▶ OUTPUT</span>রাহেলা<br>A+<br>73<br>করিম-এর object মুছে গেছে।<br>রাহেলা-এর object মুছে গেছে।</div>
+
+<div class="quiz-wrap">
+<div class="quiz-q">❓ Class-এর ভেতর থেকে নিজের property access করতে কোনটা ব্যবহার হয়?</div>
+<div class="quiz-options">
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">self::$property</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,true)">$this->property</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">me->property</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">class->property</button>
+</div>
+</div>`
+      },
+      {
+        title:'ইনহেরিটেন্স ও Interface',
+        tag:'Inheritance',
+        desc:'একটি class থেকে আরেকটি class তৈরি করা।',
+        content:`
+<div class="concept-block">
+<h3>🌳 ইনহেরিটেন্স (Inheritance)</h3>
+<p><span class="hl">extends</span> দিয়ে এক class আরেক class-এর সব property ও method পায়। Parent class-এর কোড পুনরায় ব্যবহার হয়।</p>
+</div>
+
+<div class="code-card">
+<div class="code-header"><div class="code-dots"><span class="cd cd-r"></span><span class="cd cd-y"></span><span class="cd cd-g"></span></div><span class="code-tag">inheritance.php</span></div>
+<pre class="php-code"><span class="kw">&lt;?php</span>
+<span class="cmt">// Parent Class</span>
+<span class="kw">class</span> <span class="cls">Animal</span> <span class="op">{</span>
+    <span class="kw">public</span> <span class="kw">string</span> <span class="var">$name</span><span class="op">;</span>
+
+    <span class="kw">public function</span> <span class="fn">__construct</span><span class="op">(</span><span class="kw">string</span> <span class="var">$name</span><span class="op">) {</span>
+        <span class="var">$this</span><span class="op">-&gt;</span><span class="var">name</span> <span class="op">=</span> <span class="var">$name</span><span class="op">;</span>
+    <span class="op">}</span>
+
+    <span class="kw">public function</span> <span class="fn">speak</span><span class="op">():</span> <span class="kw">string</span> <span class="op">{</span>
+        <span class="kw">return</span> <span class="str">"..."</span><span class="op">;</span>
+    <span class="op">}</span>
+<span class="op">}</span>
+
+<span class="cmt">// Child Class</span>
+<span class="kw">class</span> <span class="cls">Dog</span> <span class="kw">extends</span> <span class="cls">Animal</span> <span class="op">{</span>
+    <span class="cmt">// Override করা (Polymorphism)</span>
+    <span class="kw">public function</span> <span class="fn">speak</span><span class="op">():</span> <span class="kw">string</span> <span class="op">{</span>
+        <span class="kw">return</span> <span class="str">"<span class="var">{$this->name}</span> বলছে: ঘেউ ঘেউ!"</span><span class="op">;</span>
+    <span class="op">}</span>
+<span class="op">}</span>
+
+<span class="kw">class</span> <span class="cls">Cat</span> <span class="kw">extends</span> <span class="cls">Animal</span> <span class="op">{</span>
+    <span class="kw">public function</span> <span class="fn">speak</span><span class="op">():</span> <span class="kw">string</span> <span class="op">{</span>
+        <span class="kw">return</span> <span class="str">"<span class="var">{$this->name}</span> বলছে: মিউ মিউ!"</span><span class="op">;</span>
+    <span class="op">}</span>
+<span class="op">}</span>
+
+<span class="var">$dog</span> <span class="op">=</span> <span class="kw">new</span> <span class="cls">Dog</span><span class="op">(</span><span class="str">"টমি"</span><span class="op">);</span>
+<span class="var">$cat</span> <span class="op">=</span> <span class="kw">new</span> <span class="cls">Cat</span><span class="op">(</span><span class="str">"মিসি"</span><span class="op">);</span>
+<span class="kw">echo</span> <span class="var">$dog</span><span class="op">-&gt;</span><span class="fn">speak</span><span class="op">();</span>  <span class="cmt">// টমি বলছে: ঘেউ ঘেউ!</span>
+<span class="kw">echo</span> <span class="var">$cat</span><span class="op">-&gt;</span><span class="fn">speak</span><span class="op">();</span>  <span class="cmt">// মিসি বলছে: মিউ মিউ!</span>
+
+<span class="cmt">// === Interface ===</span>
+<span class="kw">interface</span> <span class="cls">Drawable</span> <span class="op">{</span>
+    <span class="kw">public function</span> <span class="fn">draw</span><span class="op">():</span> <span class="kw">string</span><span class="op">;</span>
+<span class="op">}</span>
+
+<span class="kw">class</span> <span class="cls">Circle</span> <span class="kw">implements</span> <span class="cls">Drawable</span> <span class="op">{</span>
+    <span class="kw">public function</span> <span class="fn">draw</span><span class="op">():</span> <span class="kw">string</span> <span class="op">{</span>
+        <span class="kw">return</span> <span class="str">"⭕ বৃত্ত আঁকা হলো"</span><span class="op">;</span>
+    <span class="op">}</span>
+<span class="op">}</span>
+
+<span class="cmt">// === Abstract Class ===</span>
+<span class="kw">abstract class</span> <span class="cls">Shape</span> <span class="op">{</span>
+    <span class="kw">abstract public function</span> <span class="fn">area</span><span class="op">():</span> <span class="kw">float</span><span class="op">;</span>
+
+    <span class="kw">public function</span> <span class="fn">describe</span><span class="op">():</span> <span class="kw">string</span> <span class="op">{</span>
+        <span class="kw">return</span> <span class="str">"ক্ষেত্রফল: "</span> <span class="op">.</span> <span class="var">$this</span><span class="op">-&gt;</span><span class="fn">area</span><span class="op">();</span>
+    <span class="op">}</span>
+<span class="op">}</span>
+
+<span class="kw">class</span> <span class="cls">Rectangle</span> <span class="kw">extends</span> <span class="cls">Shape</span> <span class="op">{</span>
+    <span class="kw">public function</span> <span class="fn">__construct</span><span class="op">(</span>
+        <span class="kw">private float</span> <span class="var">$w</span><span class="op">,</span>
+        <span class="kw">private float</span> <span class="var">$h</span>
+    <span class="op">) {}</span>
+    <span class="kw">public function</span> <span class="fn">area</span><span class="op">():</span> <span class="kw">float</span> <span class="op">{</span>
+        <span class="kw">return</span> <span class="var">$this</span><span class="op">-&gt;</span><span class="var">w</span> <span class="op">*</span> <span class="var">$this</span><span class="op">-&gt;</span><span class="var">h</span><span class="op">;</span>
+    <span class="op">}</span>
+<span class="op">}</span>
+<span class="var">$rect</span> <span class="op">=</span> <span class="kw">new</span> <span class="cls">Rectangle</span><span class="op">(</span><span class="num">5</span><span class="op">,</span> <span class="num">3</span><span class="op">);</span>
+<span class="kw">echo</span> <span class="var">$rect</span><span class="op">-&gt;</span><span class="fn">describe</span><span class="op">();</span>  <span class="cmt">// ক্ষেত্রফল: 15</span>
+<span class="kw">?&gt;</span></pre>
+</div>
+<div class="output-box"><span class="output-label">▶ OUTPUT</span>টমি বলছে: ঘেউ ঘেউ!<br>মিসি বলছে: মিউ মিউ!<br>⭕ বৃত্ত আঁকা হলো<br>ক্ষেত্রফল: 15</div>
+
+<div class="quiz-wrap">
+<div class="quiz-q">❓ Interface implement করতে কোন keyword ব্যবহার হয়?</div>
+<div class="quiz-options">
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">extends</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,true)">implements</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">inherit</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">interface</button>
+</div>
+</div>`
+      }
+    ]
+  },
+  {
+    id:'p6', color:'#00d4ff', name:'ধাপ ৬ — অ্যাডভান্স',
+    lessons:[
+      {
+        title:'Error Handling — try, catch, finally',
+        tag:'Error Handling',
+        desc:'Exception দিয়ে error সঠিকভাবে handle করা।',
+        content:`
+<div class="concept-block">
+<h3>🛡️ Error Handling</h3>
+<p>Production code-এ error আসলে প্রোগ্রাম crash না করে সুন্দরভাবে handle করতে হয়। PHP-তে <span class="hl">try-catch-finally</span> ব্যবহার করা হয়।</p>
+</div>
+
+<div class="code-card">
+<div class="code-header"><div class="code-dots"><span class="cd cd-r"></span><span class="cd cd-y"></span><span class="cd cd-g"></span></div><span class="code-tag">error-handling.php</span></div>
+<pre class="php-code"><span class="kw">&lt;?php</span>
+<span class="cmt">// Custom Exception তৈরি করা</span>
+<span class="kw">class</span> <span class="cls">AgeException</span> <span class="kw">extends</span> <span class="cls">Exception</span> <span class="op">{}</span>
+<span class="kw">class</span> <span class="cls">DatabaseException</span> <span class="kw">extends</span> <span class="cls">Exception</span> <span class="op">{}</span>
+
+<span class="kw">function</span> <span class="fn">registerUser</span><span class="op">(</span><span class="kw">string</span> <span class="var">$name</span><span class="op">,</span> <span class="kw">int</span> <span class="var">$age</span><span class="op">):</span> <span class="kw">string</span> <span class="op">{</span>
+    <span class="kw">if</span> <span class="op">(</span><span class="fn">empty</span><span class="op">(</span><span class="var">$name</span><span class="op">)) {</span>
+        <span class="kw">throw new</span> <span class="cls">InvalidArgumentException</span><span class="op">(</span><span class="str">"নাম খালি রাখা যাবে না"</span><span class="op">);</span>
+    <span class="op">}</span>
+    <span class="kw">if</span> <span class="op">(</span><span class="var">$age</span> <span class="op">&lt;</span> <span class="num">18</span><span class="op">) {</span>
+        <span class="kw">throw new</span> <span class="cls">AgeException</span><span class="op">(</span><span class="str">"বয়স ১৮-এর কম হলে রেজিস্ট্রেশন সম্ভব নয়"</span><span class="op">);</span>
+    <span class="op">}</span>
+    <span class="kw">return</span> <span class="str">"✅ <span class="var">$name</span> সফলভাবে রেজিস্ট্রেশন হয়েছে!"</span><span class="op">;</span>
+<span class="op">}</span>
+
+<span class="kw">try</span> <span class="op">{</span>
+    <span class="cmt">// এই কোড try করা হবে</span>
+    <span class="kw">echo</span> <span class="fn">registerUser</span><span class="op">(</span><span class="str">"রাহেলা"</span><span class="op">,</span> <span class="num">20</span><span class="op">);</span>
+    <span class="kw">echo</span> <span class="fn">registerUser</span><span class="op">(</span><span class="str">"করিম"</span><span class="op">,</span> <span class="num">15</span><span class="op">);</span>  <span class="cmt">// AgeException throw হবে</span>
+
+<span class="op">}</span> <span class="kw">catch</span> <span class="op">(</span><span class="cls">AgeException</span> <span class="var">$e</span><span class="op">) {</span>
+    <span class="cmt">// AgeException হলে এখানে আসবে</span>
+    <span class="kw">echo</span> <span class="str">"⚠️ বয়স সমস্যা: "</span> <span class="op">.</span> <span class="var">$e</span><span class="op">-&gt;</span><span class="fn">getMessage</span><span class="op">();</span>
+
+<span class="op">}</span> <span class="kw">catch</span> <span class="op">(</span><span class="cls">InvalidArgumentException</span> <span class="var">$e</span><span class="op">) {</span>
+    <span class="kw">echo</span> <span class="str">"❌ ইনপুট সমস্যা: "</span> <span class="op">.</span> <span class="var">$e</span><span class="op">-&gt;</span><span class="fn">getMessage</span><span class="op">();</span>
+
+<span class="op">}</span> <span class="kw">catch</span> <span class="op">(</span><span class="cls">Exception</span> <span class="var">$e</span><span class="op">) {</span>
+    <span class="cmt">// যেকোনো অন্য error</span>
+    <span class="kw">echo</span> <span class="str">"🔴 অপ্রত্যাশিত error: "</span> <span class="op">.</span> <span class="var">$e</span><span class="op">-&gt;</span><span class="fn">getMessage</span><span class="op">();</span>
+
+<span class="op">}</span> <span class="kw">finally</span> <span class="op">{</span>
+    <span class="cmt">// Error হোক বা না হোক সবসময় চলে</span>
+    <span class="kw">echo</span> <span class="str">"🔵 প্রক্রিয়া শেষ।"</span><span class="op">;</span>
+<span class="op">}</span>
+<span class="kw">?&gt;</span></pre>
+</div>
+<div class="output-box"><span class="output-label">▶ OUTPUT</span>✅ রাহেলা সফলভাবে রেজিস্ট্রেশন হয়েছে!<br>⚠️ বয়স সমস্যা: বয়স ১৮-এর কম হলে রেজিস্ট্রেশন সম্ভব নয়<br>🔵 প্রক্রিয়া শেষ।</div>
+
+<div class="quiz-wrap">
+<div class="quiz-q">❓ finally ব্লক কখন চলে?</div>
+<div class="quiz-options">
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">শুধু error হলে</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">শুধু success হলে</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,true)">সবসময়, error হোক বা না হোক</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">কখনো চলে না</button>
+</div>
+</div>`
+      },
+      {
+        title:'REST API তৈরি করা',
+        tag:'REST API',
+        desc:'PHP দিয়ে JSON API তৈরি করা যা যেকোনো frontend ব্যবহার করতে পারে।',
+        content:`
+<div class="concept-block">
+<h3>🌐 REST API</h3>
+<p>REST API হলো এমন একটি সার্ভার যা <span class="hl">JSON</span> ফরম্যাটে ডেটা দেয়। যেকোনো app (React, Vue, Mobile) এই API ব্যবহার করতে পারে।</p>
+<ul style="margin-top:.5rem">
+<li><strong>GET</strong> /api/students — সব ছাত্র দেখাও</li>
+<li><strong>POST</strong> /api/students — নতুন ছাত্র যোগ করো</li>
+<li><strong>PUT</strong> /api/students/5 — id=5 আপডেট করো</li>
+<li><strong>DELETE</strong> /api/students/5 — id=5 মুছে দাও</li>
+</ul>
+</div>
+
+<div class="code-card">
+<div class="code-header"><div class="code-dots"><span class="cd cd-r"></span><span class="cd cd-y"></span><span class="cd cd-g"></span></div><span class="code-tag">api/students.php — Simple REST API</span></div>
+<pre class="php-code"><span class="kw">&lt;?php</span>
+<span class="cmt">// JSON header সেট করা</span>
+<span class="fn">header</span><span class="op">(</span><span class="str">"Content-Type: application/json"</span><span class="op">);</span>
+<span class="fn">header</span><span class="op">(</span><span class="str">"Access-Control-Allow-Origin: *"</span><span class="op">);</span>
+
+<span class="cmt">// Request method জানা</span>
+<span class="var">$method</span> <span class="op">=</span> <span class="var">$_SERVER</span><span class="op">[</span><span class="str">"REQUEST_METHOD"</span><span class="op">];</span>
+
+<span class="kw">function</span> <span class="fn">sendResponse</span><span class="op">(</span><span class="kw">int</span> <span class="var">$code</span><span class="op">,</span> <span class="kw">array</span> <span class="var">$data</span><span class="op">):</span> <span class="kw">void</span> <span class="op">{</span>
+    <span class="fn">http_response_code</span><span class="op">(</span><span class="var">$code</span><span class="op">);</span>
+    <span class="kw">echo</span> <span class="fn">json_encode</span><span class="op">(</span><span class="var">$data</span><span class="op">,</span> <span class="cls">JSON_UNESCAPED_UNICODE</span><span class="op">);</span>
+    <span class="kw">exit</span><span class="op">;</span>
+<span class="op">}</span>
+
+<span class="kw">switch</span> <span class="op">(</span><span class="var">$method</span><span class="op">) {</span>
+    <span class="kw">case</span> <span class="str">"GET"</span><span class="op">:</span>
+        <span class="cmt">// DB থেকে ডেটা এনে JSON দাও</span>
+        <span class="var">$students</span> <span class="op">=</span> <span class="op">[</span>
+            <span class="op">[</span><span class="str">"id"</span><span class="op">=&gt;</span><span class="num">1</span><span class="op">,</span> <span class="str">"নাম"</span><span class="op">=&gt;</span><span class="str">"রাহেলা"</span><span class="op">,</span> <span class="str">"cgpa"</span><span class="op">=&gt;</span><span class="num">3.85</span><span class="op">],</span>
+            <span class="op">[</span><span class="str">"id"</span><span class="op">=&gt;</span><span class="num">2</span><span class="op">,</span> <span class="str">"নাম"</span><span class="op">=&gt;</span><span class="str">"করিম"</span><span class="op">,</span>  <span class="str">"cgpa"</span><span class="op">=&gt;</span><span class="num">3.72</span><span class="op">],</span>
+        <span class="op">];</span>
+        <span class="fn">sendResponse</span><span class="op">(</span><span class="num">200</span><span class="op">, [</span>
+            <span class="str">"success"</span> <span class="op">=&gt;</span> <span class="kw">true</span><span class="op">,</span>
+            <span class="str">"data"</span>    <span class="op">=&gt;</span> <span class="var">$students</span>
+        <span class="op">]);</span>
+
+    <span class="kw">case</span> <span class="str">"POST"</span><span class="op">:</span>
+        <span class="cmt">// Request body পড়া (JSON)</span>
+        <span class="var">$input</span> <span class="op">=</span> <span class="fn">json_decode</span><span class="op">(</span><span class="fn">file_get_contents</span><span class="op">(</span><span class="str">"php://input"</span><span class="op">),</span> <span class="kw">true</span><span class="op">);</span>
+        <span class="cmt">// DB-তে save করো... (code simplified)</span>
+        <span class="fn">sendResponse</span><span class="op">(</span><span class="num">201</span><span class="op">, [</span>
+            <span class="str">"success"</span> <span class="op">=&gt;</span> <span class="kw">true</span><span class="op">,</span>
+            <span class="str">"message"</span> <span class="op">=&gt;</span> <span class="str">"ছাত্র যোগ করা হয়েছে"</span>
+        <span class="op">]);</span>
+
+    <span class="kw">default</span><span class="op">:</span>
+        <span class="fn">sendResponse</span><span class="op">(</span><span class="num">405</span><span class="op">, [</span><span class="str">"error"</span> <span class="op">=&gt;</span> <span class="str">"Method না মানা"</span><span class="op">]);</span>
+<span class="op">}</span>
+<span class="kw">?&gt;</span></pre>
+</div>
+<div class="output-box"><span class="output-label">▶ JSON RESPONSE (GET)</span>{"success": true, "data": [{"id": 1, "নাম": "রাহেলা", "cgpa": 3.85}, {"id": 2, "নাম": "করিম", "cgpa": 3.72}]}</div>
+
+<div class="info-box info-green">
+<strong>🚀 Laravel দিয়ে API:</strong> Real project-এ <code>Laravel</code> framework ব্যবহার করো। এটাতে routing, middleware, authentication সব built-in আছে এবং API তৈরি অনেক সহজ।
+</div>
+
+<div class="quiz-wrap">
+<div class="quiz-q">❓ নতুন resource তৈরি করতে কোন HTTP method ব্যবহার হয়?</div>
+<div class="quiz-options">
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">GET</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,true)">POST</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">PUT</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">DELETE</button>
+</div>
+</div>`
+      },
+      {
+        title:'Security — XSS, CSRF, Password Hash',
+        tag:'Security',
+        desc:'PHP application-কে সাধারণ আক্রমণ থেকে রক্ষা করা।',
+        content:`
+<div class="concept-block">
+<h3>🔐 Web Security</h3>
+<p>প্রতিটি web app-এ কিছু common security threat আছে। এগুলো জানা এবং সুরক্ষা করা অত্যন্ত জরুরি।</p>
+</div>
+
+<div class="code-card">
+<div class="code-header"><div class="code-dots"><span class="cd cd-r"></span><span class="cd cd-y"></span><span class="cd cd-g"></span></div><span class="code-tag">security.php</span></div>
+<pre class="php-code"><span class="kw">&lt;?php</span>
+<span class="cmt">// ======= ১. XSS (Cross-Site Scripting) থেকে বাঁচো =======</span>
+<span class="cmt">// ❌ বিপজ্জনক — সরাসরি ইনপুট দেখাচ্ছে</span>
+<span class="kw">echo</span> <span class="var">$_GET</span><span class="op">[</span><span class="str">'name'</span><span class="op">];</span>
+
+<span class="cmt">// ✅ নিরাপদ — htmlspecialchars দিয়ে escape করো</span>
+<span class="kw">echo</span> <span class="fn">htmlspecialchars</span><span class="op">(</span><span class="var">$_GET</span><span class="op">[</span><span class="str">'name'</span><span class="op">],</span> <span class="cls">ENT_QUOTES</span><span class="op">,</span> <span class="str">'UTF-8'</span><span class="op">);</span>
+
+<span class="cmt">// ======= ২. Password Hash =======</span>
+<span class="cmt">// ❌ কখনো plain text password রেখো না</span>
+<span class="var">$bad</span> <span class="op">=</span> <span class="str">"password123"</span><span class="op">;</span>  <span class="cmt">// DB-তে এভাবে রাখা যাবে না</span>
+
+<span class="cmt">// ✅ password_hash() — bcrypt দিয়ে hash করে</span>
+<span class="var">$password</span> <span class="op">=</span> <span class="str">"আমারPassword@123"</span><span class="op">;</span>
+<span class="var">$hashed</span> <span class="op">=</span> <span class="fn">password_hash</span><span class="op">(</span><span class="var">$password</span><span class="op">,</span> <span class="cls">PASSWORD_BCRYPT</span><span class="op">);</span>
+<span class="cmt">// DB-তে $hashed সংরক্ষণ করো</span>
+
+<span class="cmt">// Login করার সময় verify করো</span>
+<span class="kw">if</span> <span class="op">(</span><span class="fn">password_verify</span><span class="op">(</span><span class="var">$password</span><span class="op">,</span> <span class="var">$hashed</span><span class="op">)) {</span>
+    <span class="kw">echo</span> <span class="str">"✅ পাসওয়ার্ড সঠিক!"</span><span class="op">;</span>
+<span class="op">}</span>
+
+<span class="cmt">// ======= ৩. CSRF Token =======</span>
+<span class="fn">session_start</span><span class="op">();</span>
+<span class="cmt">// Token তৈরি করো</span>
+<span class="kw">if</span> <span class="op">(!</span><span class="fn">isset</span><span class="op">(</span><span class="var">$_SESSION</span><span class="op">[</span><span class="str">'csrf_token'</span><span class="op">])) {</span>
+    <span class="var">$_SESSION</span><span class="op">[</span><span class="str">'csrf_token'</span><span class="op">] =</span> <span class="fn">bin2hex</span><span class="op">(</span><span class="fn">random_bytes</span><span class="op">(</span><span class="num">32</span><span class="op">));</span>
+<span class="op">}</span>
+<span class="cmt">// Form-এ hidden field হিসেবে দাও</span>
+<span class="cmt">// &lt;input type="hidden" name="csrf" value="&lt;?= $_SESSION['csrf_token'] ?&gt;"&gt;</span>
+
+<span class="cmt">// Submit হলে verify করো</span>
+<span class="kw">if</span> <span class="op">(</span><span class="var">$_POST</span><span class="op">[</span><span class="str">'csrf'</span><span class="op">]</span> <span class="op">!==</span> <span class="var">$_SESSION</span><span class="op">[</span><span class="str">'csrf_token'</span><span class="op">]) {</span>
+    <span class="kw">die</span><span class="op">(</span><span class="str">"❌ CSRF আক্রমণ শনাক্ত!"</span><span class="op">);</span>
+<span class="op">}</span>
+
+<span class="cmt">// ======= ৪. Input Validation =======</span>
+<span class="var">$email</span> <span class="op">=</span> <span class="fn">filter_var</span><span class="op">(</span><span class="var">$_POST</span><span class="op">[</span><span class="str">'email'</span><span class="op">],</span> <span class="cls">FILTER_VALIDATE_EMAIL</span><span class="op">);</span>
+<span class="var">$age</span>   <span class="op">=</span> <span class="fn">filter_var</span><span class="op">(</span><span class="var">$_POST</span><span class="op">[</span><span class="str">'age'</span><span class="op">],</span>   <span class="cls">FILTER_VALIDATE_INT</span><span class="op">);</span>
+<span class="var">$url</span>   <span class="op">=</span> <span class="fn">filter_var</span><span class="op">(</span><span class="var">$_POST</span><span class="op">[</span><span class="str">'url'</span><span class="op">],</span>   <span class="cls">FILTER_VALIDATE_URL</span><span class="op">);</span>
+<span class="kw">?&gt;</span></pre>
+</div>
+
+<table class="data-table">
+<tr><th>আক্রমণ</th><th>কী হয়</th><th>সুরক্ষা</th></tr>
+<tr><td>XSS</td><td>JS code ইনজেক্ট করা</td><td><code>htmlspecialchars()</code></td></tr>
+<tr><td>SQL Injection</td><td>DB query নষ্ট করা</td><td>Prepared Statement</td></tr>
+<tr><td>CSRF</td><td>অজান্তে form submit</td><td>CSRF Token</td></tr>
+<tr><td>Brute Force</td><td>বারবার password try</td><td>Rate limiting</td></tr>
+</table>
+
+<div class="quiz-wrap">
+<div class="quiz-q">❓ Password DB-তে কিভাবে সংরক্ষণ করতে হবে?</div>
+<div class="quiz-options">
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">Plain text হিসেবে</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">Base64 encode করে</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,true)">password_hash() দিয়ে hash করে</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,false)">MD5 করে</button>
+</div>
+</div>`
+      }
+    ]
+  }
+];
+
+// ============================================================
+// FLATTEN LESSONS
+// ============================================================
+const allLessons = [];
+PHASES.forEach((ph, pi) => {
+  ph.lessons.forEach((l, li) => {
+    allLessons.push({ ...l, phaseIdx: pi, lessonIdx: li, globalIdx: allLessons.length });
+  });
+});
+
+document.getElementById('total-lessons-stat').textContent = allLessons.length;
+
+// Done state
+const done = new Set(JSON.parse(localStorage.getItem('php_done') || '[]'));
+
+// ============================================================
+// BUILD SIDEBAR NAV
+// ============================================================
+function buildNav() {
+  const container = document.getElementById('nav-container');
+  container.innerHTML = '';
+  PHASES.forEach((ph, pi) => {
+    const phDiv = document.createElement('div');
+    phDiv.className = 'nav-phase';
+    phDiv.innerHTML = `
+      <button class="phase-btn" id="phasebtn-${pi}" onclick="togglePhase(${pi})">
+        <span class="phase-dot" style="color:${ph.color};background:${ph.color}20;border:1.5px solid ${ph.color}"></span>
+        <span class="phase-label">${ph.name}</span>
+        <span style="margin-left:auto;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace">${ph.lessons.length}</span>
+      </button>
+      <div class="lesson-list" id="lessonlist-${pi}">
+        ${ph.lessons.map((l, li) => {
+          const gIdx = PHASES.slice(0,pi).reduce((a,p)=>a+p.lessons.length,0) + li;
+          return `<button class="lesson-item ${done.has(gIdx)?'done':''}" id="lessonitem-${gIdx}" onclick="loadLesson(${pi},${li})">${l.title}</button>`;
+        }).join('')}
+      </div>`;
+    container.appendChild(phDiv);
+  });
+}
+
+function togglePhase(pi) {
+  const list = document.getElementById('lessonlist-' + pi);
+  list.classList.toggle('open');
+}
+
+function openPhase(pi) {
+  document.getElementById('lessonlist-' + pi)?.classList.add('open');
+}
+
+// ============================================================
+// LOAD LESSON
+// ============================================================
+let currentGlobal = -1;
+
+function loadLesson(pi, li) {
+  const ph = PHASES[pi];
+  const lesson = ph.lessons[li];
+  const gIdx = PHASES.slice(0,pi).reduce((a,p)=>a+p.lessons.length,0) + li;
+  currentGlobal = gIdx;
+
+  // Hide welcome, show lesson area
+  document.getElementById('welcome').style.display = 'none';
+  const area = document.getElementById('lesson-area');
+  area.style.display = 'block';
+
+  // Active states
+  document.querySelectorAll('.lesson-item').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.phase-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('lessonitem-' + gIdx)?.classList.add('active');
+  document.getElementById('phasebtn-' + pi)?.classList.add('active');
+  openPhase(pi);
+
+  // Prev/Next
+  const prevIdx = gIdx - 1;
+  const nextIdx = gIdx + 1;
+  const hasPrev = prevIdx >= 0;
+  const hasNext = nextIdx < allLessons.length;
+
+  area.innerHTML = `
+    <div class="lesson-content">
+      <div class="lesson-hero">
+        <div class="lesson-phase-tag" style="background:${ph.color}18;border-color:${ph.color}40;color:${ph.color}">
+          <span style="width:6px;height:6px;border-radius:50%;background:${ph.color};display:inline-block;box-shadow:0 0 6px ${ph.color}"></span>
+          ${ph.name} &nbsp;·&nbsp; ${lesson.tag}
+        </div>
+        <h1 class="lesson-title">${lesson.title}</h1>
+        <p class="lesson-desc">${lesson.desc}</p>
+      </div>
+
+      <button class="done-btn ${done.has(gIdx)?'marked':''}" id="done-btn" onclick="markDone(${gIdx})">
+        ${done.has(gIdx) ? '✅ সম্পন্ন হয়েছে' : '☐ সম্পন্ন হিসেবে চিহ্নিত করো'}
+      </button>
+
+      ${lesson.content}
+
+      <div class="lesson-nav">
+        <button class="nav-btn" onclick="goPrev()" ${!hasPrev?'disabled':''}>← আগের লেসন</button>
+        <button class="nav-btn primary" onclick="goNext()" ${!hasNext?'disabled':''}>পরের লেসন →</button>
+      </div>
+    </div>`;
+
+  window.scrollTo({top: 0, behavior: 'smooth'});
+  closeSidebar();
+}
+
+function goPrev() {
+  if (currentGlobal > 0) {
+    const prev = allLessons[currentGlobal - 1];
+    loadLesson(prev.phaseIdx, prev.lessonIdx);
+  }
+}
+
+function goNext() {
+  if (currentGlobal < allLessons.length - 1) {
+    const next = allLessons[currentGlobal + 1];
+    loadLesson(next.phaseIdx, next.lessonIdx);
+  }
+}
+
+// ============================================================
+// DONE TRACKING
+// ============================================================
+function markDone(gIdx) {
+  if (done.has(gIdx)) {
+    done.delete(gIdx);
+  } else {
+    done.add(gIdx);
+  }
+  localStorage.setItem('php_done', JSON.stringify([...done]));
+  buildNav();
+  updateProgress();
+
+  const btn = document.getElementById('done-btn');
+  if (btn) {
+    btn.className = 'done-btn ' + (done.has(gIdx) ? 'marked' : '');
+    btn.textContent = done.has(gIdx) ? '✅ সম্পন্ন হয়েছে' : '☐ সম্পন্ন হিসেবে চিহ্নিত করো';
+  }
+}
+
+function updateProgress() {
+  const pct = Math.round((done.size / allLessons.length) * 100);
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+// ============================================================
+// QUIZ
+// ============================================================
+function checkQuiz(btn, correct) {
+  const opts = btn.parentElement.querySelectorAll('.quiz-opt');
+  opts.forEach(o => { o.disabled = true; });
+  if (correct) {
+    btn.classList.add('correct');
+    const fb = document.createElement('div');
+    fb.className = 'quiz-feedback info-green';
+    fb.style.cssText = 'background:rgba(16,217,138,.07);border-radius:8px;padding:8px 12px;margin-top:8px;font-size:13px;color:#6ee7b7';
+    fb.textContent = '🎉 সঠিক উত্তর! চমৎকার!';
+    btn.parentElement.parentElement.appendChild(fb);
+  } else {
+    btn.classList.add('wrong');
+    opts.forEach(o => { if (o.dataset.correct === 'true') o.classList.add('correct'); });
+    const fb = document.createElement('div');
+    fb.style.cssText = 'background:rgba(255,92,92,.07);border-radius:8px;padding:8px 12px;margin-top:8px;font-size:13px;color:#fca5a5';
+    fb.textContent = '❌ ভুল হয়েছে — সঠিক উত্তর সবুজ রঙে দেখানো হচ্ছে।';
+    btn.parentElement.parentElement.appendChild(fb);
+  }
+}
+
+// ============================================================
+// SIDEBAR MOBILE
+// ============================================================
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('mobile-open');
+  document.getElementById('overlay').classList.toggle('active');
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('mobile-open');
+  document.getElementById('overlay').classList.remove('active');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+buildNav();
+updateProgress();
+// Open phase 1 by default
+document.getElementById('lessonlist-0')?.classList.add('open');
+</script>
+</body>
+</html>
